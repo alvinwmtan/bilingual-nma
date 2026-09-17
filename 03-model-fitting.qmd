@@ -1,0 +1,78 @@
+---
+title: "Model fitting"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(cmdstanr)
+library(here)
+
+df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
+```
+
+# Construction
+```{r}
+build_stan_data <- function(df_contrasts, formula = ~ 1) {
+  
+  # ~ 1 gives an intercept-only matrix; drop it to get 0 columns
+  X <- model.matrix(formula, data = df_contrasts)
+  X <- X[, setdiff(colnames(X), "(Intercept)"), drop = FALSE]
+  
+  if (nrow(df_contrasts) != nrow(X)) {
+    stop("Mismatch in nrow between df_contrasts and X")
+  }
+  
+  N_ppt <- max(c(df_contrasts$ppt_trt_id, df_contrasts$ppt_ref_id))
+  
+  list(
+    N_obs      = nrow(df_contrasts),
+    N_study    = n_distinct(df_contrasts$study_id),
+    N_ppt      = N_ppt,
+    K          = 4L,
+    P          = ncol(X),
+    
+    y          = df_contrasts$y,
+    se_y       = df_contrasts$se_y,
+    
+    arm_trt    = df_contrasts$arm_trt,
+    arm_ref    = df_contrasts$arm_ref,
+    study_id   = df_contrasts$study_id,
+    ppt_trt_id = df_contrasts$ppt_trt_id,
+    ppt_ref_id = df_contrasts$ppt_ref_id,
+    paired     = df_contrasts$paired,
+    
+    X          = X
+  )
+}
+
+mod <- cmdstan_model("nma_bilingual.stan")
+```
+
+# Fitting
+```{r}
+model_specs <- list(
+  base                  = ~ 1,
+  age                   = ~ age_c,
+  vocab_type            = ~ vocab_type,
+  infant_typical        = ~ infant_typical,
+  assessment_procedure  = ~ assessment_procedure
+)
+
+fit_one <- function(spec_formula) {
+  stan_data <- build_stan_data(df_contrasts, spec_formula)
+  mod$sample(
+    data            = stan_data,
+    seed            = 42,
+    chains          = 4,
+    parallel_chains = 4,
+    iter_warmup     = 1000,
+    iter_sampling   = 2000,
+    adapt_delta     = 0.95
+  )
+}
+
+fits <- map(model_specs, fit_one)
+saveRDS(fits, here("outputs", "fits.rds"))
+```
+

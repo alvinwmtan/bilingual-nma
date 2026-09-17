@@ -75,8 +75,8 @@ parameters {
   matrix[N_ppt, K-1]        z_ppt;  // non-centred
   
   // SD inflation
-  real<lower=0> sigma_add_paired;
-  real<lower=0> sigma_add_unpaired;
+  // real<lower=0> sigma_add_paired;
+  // real<lower=0> sigma_add_unpaired;
 }
 
 transformed parameters {
@@ -98,14 +98,15 @@ model {
   mu_d ~ normal(0, 1);
 
   // Slopes: shrink fairly strongly unless covariates are well-scaled
-  to_vector(beta) ~ normal(0, 0.5);
+  if (P > 0)
+    to_vector(beta) ~ normal(0, 0.5);
 
   tau          ~ normal(0, 0.3);
   sigma_within ~ normal(0, 0.3);
   sigma_ppt    ~ normal(0, 0.3);
   
-  sigma_add_paired   ~ normal(0, 0.2);
-  sigma_add_unpaired ~ normal(0, 0.2);
+  // sigma_add_paired   ~ normal(0, 0.2);
+  // sigma_add_unpaired ~ normal(0, 0.2);
 
   to_vector(z_study) ~ std_normal();
   to_vector(z_ppt)   ~ std_normal();
@@ -116,17 +117,19 @@ model {
 
   // Likelihood
   for (i in 1:N_obs) {
-    real eta_base =
-      arm_effect(arm_trt[i], study_id[i], ppt_trt_id[i], mu_d, delta_study, u_ppt, v_ppt)
-    - arm_effect(arm_ref[i], study_id[i], ppt_ref_id[i], mu_d, delta_study, u_ppt, v_ppt);
-
-    row_vector[P] b_trt = beta_of_arm(arm_trt[i], beta, P);
-    row_vector[P] b_ref = beta_of_arm(arm_ref[i], beta, P);
-
-    real eta = eta_base + dot_product( X[i], (b_trt - b_ref)' );
+    real eta =
+      arm_effect(arm_trt[i], study_id[i], ppt_trt_id[i], mu_d, delta_study, u_ppt, v_ppt) - 
+      arm_effect(arm_ref[i], study_id[i], ppt_ref_id[i], mu_d, delta_study, u_ppt, v_ppt);
+        
+    if (P > 0) {
+      row_vector[P] b_trt = beta_of_arm(arm_trt[i], beta, P);
+      row_vector[P] b_ref = beta_of_arm(arm_ref[i], beta, P);
+      
+      eta += (b_trt - b_ref) * X[i]';
+    }
     
-    real sigma_add = paired[i] == 1 ? sigma_add_paired : sigma_add_unpaired;
-    real sigma_i   = sqrt(square(se_y[i]) + square(sigma_add));
+    // real sigma_add = paired[i] == 1 ? sigma_add_paired : sigma_add_unpaired;
+    real sigma_i   = sqrt(square(se_y[i])); // + square(sigma_add));
     
     y[i] ~ normal(eta, sigma_i);
   }

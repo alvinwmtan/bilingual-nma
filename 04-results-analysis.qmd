@@ -1,0 +1,91 @@
+---
+title: "Results analysis"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(cmdstanr)
+library(here)
+
+fits <- readRDS(here("outputs", "fits.rds"))
+```
+
+# Summary
+```{r}
+summarise_fit <- function(fit, spec_name, draws = FALSE) {
+  vars <- c("mu_d", "tau", "Omega", "sigma_within", "sigma_ppt",
+            "d_total_vs_L1", "d_conceptual_vs_L1", "d_conceptual_vs_total")
+  
+  # add beta only if the model had moderators
+  if (any(grepl("^beta", fit$metadata()$stan_variables)))
+    vars <- c(vars, "beta")
+  
+  if (draws) {
+    fit$draws(vars) |> 
+      as_tibble() |> 
+      mutate(model = spec_name, .before = 1)
+  } else {
+    fit$summary(
+      vars,
+      mean, median, sd, mad,
+      \(x) posterior::quantile2(x, probs = c(0.025, 0.975)),
+      posterior::default_convergence_measures()
+    ) |>
+      mutate(model = spec_name, .before = 1)
+  }
+}
+```
+
+```{r}
+df_res_all <- imap(fits, summarise_fit) |> bind_rows()
+write_csv(df_res_all, "df_res_all.csv")
+```
+
+```{r eval=F}
+df_draws <- imap(fits, \(f, n) summarise_fit(f, n, draws = TRUE)) |> bind_rows()
+```
+
+# Plotting
+```{r}
+p_res <- df_res_all |> 
+  separate_wider_delim(variable, delim = "[", too_few = "align_start", 
+                       names = c("variable", "comparison")) |> 
+  filter(variable != "Omega",
+         !str_starts(variable, "d_")) |> 
+  mutate(comparison = str_remove_all(comparison, "(,1)?]") |> 
+           factor(levels = c(1, 2, 3),
+                  labels = c("single-language", "total", "conceptual")),
+         model = factor(model, 
+                        levels = c("base", "age", "vocab_type", 
+                                   "assessment_procedure", "infant_typical"),
+                        labels = c("Base", "Age", "Vocab domain",
+                                   "Inst type", "Typical devt")),
+         variable = factor(variable, 
+                           levels = c("mu_d", "sigma_within", "sigma_ppt", 
+                                      "tau", "beta"),
+                           labels = c("Effect size", "Within corr var", 
+                                      "Between var", "Heterogeneity", 
+                                      "Regression coef")) |> 
+           fct_rev(),
+         credible = ifelse(sign(q2.5) == sign(q97.5), "credible", "not credible")) |> 
+  ggplot(aes(x = mean, y = variable, col = comparison)) +
+  geom_vline(xintercept = 0, lty = "dashed") +
+  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), height = 0) +
+  geom_point(aes(shape = credible)) +
+  facet_grid(~ model) +
+  scale_shape_manual(values = c(16, 1)) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.spacing = unit(0, "pt")) +
+  labs(x = "Posterior estimate", y = "", col = "Vocab measure", shape = "Crediblility")
+
+p_res
+
+# vocab_domain: receptive - expressive
+# inst_type = indirect - direct
+# typical_devt = typical - atypical
+```
+

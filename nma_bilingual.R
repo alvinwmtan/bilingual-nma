@@ -1,21 +1,191 @@
 library(tidyverse)
 library(cmdstanr)
 library(googlesheets4)
+library(here)
 
 # ── 0. Load data ────────────────────────────────────────────────────────────
 ss <- "1Bv0_BjwayZBXeYDtM439AdTjKdH16fvQfarGahmzVSc"
-df_data <- read_sheet(ss, "Alvin")
+df_data_a <- read_sheet(ss, "Alvin")
+df_data_g <- read_sheet(ss, "Gianmatteo")
+df_data_f <- read_sheet(ss, "Federica")
+df_main <- read_sheet(ss, "main")
 
-df_data <- df_data |>
-  filter(is.na(exclusion_reason)) |> 
+clean_df <- function(df_dat) {
+  df_dat |> 
+    filter_out(str_detect(has_full_text, "exclude"),
+               str_detect(compare_group, "exclude")) |> 
+    mutate(across(where(is.list), 
+                  \(x) map_dbl(x, \(y) ifelse(is.null(y) || is.na(y), NA, 
+                                              y |> str_remove(" \\(.*\\)") |> as.numeric()))),
+           notes = coalesce(notes, `...35`),
+           across(where(is.character), \(x) na_if(x, "/"))) |> 
+    select(-`...35`)
+}
+
+df_data_f <- bind_rows(
+  df_data_f |> 
+    mutate(compare_group = map(
+      compare_group, 
+      \(x) ifelse(is.null(x), NA,
+                  replace_values(as.character(x),
+                                 "1 & 2" ~ "1",
+                                 "3 & 4" ~ "3",
+                                 "5 & 6" ~ "5"
+                  )))),
+  df_data_f |> 
+    filter(map_lgl(compare_group, \(x) ifelse(is.null(x), FALSE, str_detect(x, " & ")))) |> 
+    mutate(compare_group = map(
+      compare_group, 
+      \(x) ifelse(is.null(x), NA,
+                  replace_values(as.character(x),
+                                 "1 & 2" ~ "2",
+                                 "3 & 4" ~ "4",
+                                 "5 & 6" ~ "6"
+                  ))))
+)
+
+df_data_raw <- bind_rows(
+  df_data_a |>
+    filter(is.na(exclusion_reason)),
+  clean_df(df_data_g),
+  clean_df(df_data_f)
+) |> 
+  select(-starts_with("clt_"))
+
+df_exclusions <- bind_rows(
+  df_data_a |> 
+    filter(!is.na(exclusion_reason)) |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    select(long_cite, short_cite, has_full_text, compare_group, exclusion_reason, notes),
+  df_data_g |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    filter(str_detect(has_full_text, "exclude") |
+             str_detect(compare_group, "exclude") |
+             notes == "no comparison") |> 
+    select(long_cite, short_cite, has_full_text, compare_group, notes),
+  df_data_f |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    filter(str_detect(has_full_text, "exclude") |
+             str_detect(compare_group, "exclude") |
+             notes == "no comparison") |> 
+    select(long_cite, short_cite, has_full_text, compare_group, notes),
+) |> 
+  mutate(exclusion_reason = case_when(
+    !is.na(exclusion_reason) ~ exclusion_reason,
+    notes == "no comparison" ~ "no comparison",
+    str_detect(compare_group, "exclude") ~ compare_group,
+    str_detect(has_full_text, "exclude") ~ has_full_text,
+    has_full_text == "no" ~ "no full text",
+    .default = NA
+  )) |> 
+  select(long_cite, short_cite, exclusion_reason) |> 
+  bind_rows(df_main |> 
+              mutate(has_full_text = str_replace_all(has_full_text, "(exclue|exlculde|excude)", "exclude")) |> 
+              filter(str_detect(str_to_lower(has_full_text), "exclude")) |> 
+              select(long_cite, short_cite, exclusion_reason = has_full_text)) |> 
+  distinct() |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(exclusion_reason = str_c(exclusion_reason, collapse = " / "),
+            .groups = "drop") |> 
+  mutate(exclusion_reason = exclusion_reason |> str_to_lower() |> str_remove_all("exclude(d) ?"))
+
+write_csv(df_exclusions |> select(exclusion_reason) |> distinct(), here("data", "exclusions.csv"))
+df_exclusions_cleaned <- read_csv(here("data", "exclusions_cleaned.csv"))
+df_exclusions <- df_exclusions |> 
+  mutate(exclusion_reason = str_replace(exclusion_reason, " / $", " /")) |> 
+  left_join(df_exclusions_cleaned, by = join_by(exclusion_reason))
+df_exclusion_summary <- df_exclusions |> 
+  group_by(exclusion_reason_cleaned) |> 
+  summarise(n = n())
+df_data_raw <- df_data_raw |> 
+  filter(!(long_cite %in% df_exclusions$long_cite))
+
+# sanity check
+df_main |> 
+  filter(!long_cite %in% c(df_data_raw$long_cite, df_exclusions$long_cite),
+         !inclusion_decision_new %in% c("E+E", "M+E")) |> 
+  View()
+
+clean_lang <- function(lang) {
+  lang |> 
+    str_replace_all("French, English,  \\(n = 1 Hebrew, n = 1 Turkish, and n = 4 Italian\\)", "various") |> 
+    str_remove_all(" ?\\(.*\\) ?") |> 
+    str_remove_all("\"]") |> 
+    str_remove_all("-speaking") |> 
+    str_replace_all("( and |, | or )", "/") |> 
+    str_remove_all("\\.$") |> 
+    str_remove_all("[0-9]+%? ?") |> 
+    replace_when(
+      str_detect(lang, "([Dd]ifferent|mixed|[Oo]ther|:|non-?English|Moroccan)") ~ "various",
+      str_detect(lang, "(^/$|^na|^n=|Not reported)") ~ NA,
+      str_detect(lang, "Peruvian") ~ "Quechua/Spanish",
+      lang == "english" ~ "English"
+    )
+}
+
+df_data_cleaned <- df_data_raw |> 
   mutate(
-    vocab_measure = if_else(vocab_measure == "single-language",
-                            "language-specific", vocab_measure),
+    lang_group = lang_group |> 
+      str_to_lower() |> 
+      str_replace_all(
+        c(" \\(.*" = "",
+          "multi/bilingual" = "multilingual",
+          "bilngual" = "bilingual")
+      ),
+    vocab_measure = vocab_measure |> 
+      str_to_lower() |> 
+      str_replace_all(
+        c(
+          " vocabulary" = "",
+          " spe" = "-spe",
+          " \\(english\\)" = "",
+          "cifc" = "cific"
+        )
+      ) |> na_if("/"),
+    vocab_measure = ifelse(lang_group == "monolingual" & is.na(vocab_measure),
+                           "language-specific", vocab_measure),
+    across(c(L1, L2), clean_lang),
+    N = str_remove_all(N, " \\(.*\\)"),
+    assessment_tool_L1 = na_if(assessment_tool_L1, "na"),
+    assessment_tool_L1 = na_if(assessment_tool_L1, "Not reported"),
+    assessment_tool_L2 = na_if(assessment_tool_L2, "na")) |> 
+  filter(vocab_type %in% c("receptive", "expressive"))
+
+df_data_cleaned |> 
+  select(infant_type, L1, L2, is_plurilingual, bilingual_type, 
+         country, assessment_tool_L1, assessment_tool_L2, vocab_units) |> 
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value") |> 
+  mutate(variable = replace_values(variable,
+                                   c("L1", "L2") ~ "lang",
+                                   c("assessment_tool_L1", "assessment_tool_L2") ~ "assessment_tool")) |> 
+  distinct() |> 
+  arrange(variable, value) |> 
+  write_csv(here("data", "variable_mapping.csv"))
+
+var_map <- read_csv(here("data", "variable_mapping_std.csv")) |> 
+  mutate(variable = map(variable, \(v) {
+    if (v == "lang") return(c("L1", "L2"))
+    if (v == "assessment_tool") return(c("assessment_tool_L1", "assessment_tool_L2"))
+    v
+  })) |> 
+  unnest(variable)
+
+df_data_std <- df_data_cleaned |> 
+  pivot_longer(cols = c(infant_type, L1, L2, is_plurilingual, bilingual_type, 
+                        country, assessment_tool_L1, assessment_tool_L2, vocab_units), 
+               names_to = "variable", values_to = "value") |> 
+  left_join(var_map, by = join_by(variable, value)) |> 
+  select(-value) |> 
+  pivot_wider(names_from = variable, values_from = std_value)
+
+df_data <- df_data_std |>
+  mutate(
     N                = as.numeric(N),
     vocab_score_mean = as.numeric(vocab_score_mean),
     vocab_score_sd   = as.numeric(vocab_score_sd),
     age_mean         = as.numeric(age_mean) |> 
-      coalesce(rowMeans(cbind(age_max, age_min)))
+      coalesce(rowMeans(cbind(age_max, age_min))),
+    infant_typical   = infant_type == "typical"
   )
 
 # ── 1. Effect size helpers: Cohen's d / Hedges g (independent-groups) ──────
@@ -36,32 +206,20 @@ smd_independent <- function(m_trt, sd_trt, n_trt, m_ref, sd_ref, n_ref,
 }
 
 # ── 2. Assign NMA arms and score language ───────────────────────────────────
-# Normalize language strings and split into a set
-parse_lang_set <- function(x) {
-  x <- tolower(trimws(x))
-  x <- gsub("\\s*\\(.*?\\)", "", x)          # drop parenthetical notes
-  x <- gsub("\\s+", " ", x)
-  x <- gsub("\\band\\b", "/", x)
-  x <- gsub("[,;|&]+", "/", x)
-  x <- gsub("\\s*/\\s*", "/", x)
-  
-  # Handle common abbreviations/synonyms (extend as needed)
-  x <- gsub("\\beng\\b", "english", x)
-  x <- gsub("\\bsp\\b|\\bspa\\b|\\bespanol\\b|\\bespañol\\b", "spanish", x)
-  x <- gsub("\\bmandarin chinese\\b|\\bchinese\\b", "mandarin", x)
-  
-  parts <- strsplit(x, "/", fixed = TRUE)
-  lapply(parts, function(v) unique(na.omit(trimws(v[v != ""]))))
-}
-
 # TRUE if any overlap, FALSE if none; NA if either side missing/empty
 lang_overlap <- function(a, b) {
-  A <- parse_lang_set(a)
-  B <- parse_lang_set(b)
-  mapply(function(x, y) {
+  A <- str_split(a, ",")
+  B <- str_split(b, ",")
+  # mapply(function(x, y) {
+  #   if (length(x) == 0 || length(y) == 0) return(NA)
+  #   length(intersect(x, y)) > 0
+  # }, A, B)
+  map2_lgl(A, B, \(x, y) {
     if (length(x) == 0 || length(y) == 0) return(NA)
+    if ("zho" %in% x && ("cmn" %in% y || "yue" %in% y)) return(TRUE)
+    if ("zho" %in% y && ("cmn" %in% x || "yue" %in% x)) return(TRUE)
     length(intersect(x, y)) > 0
-  }, A, B)
+  })
 }
 
 df_arms <- df_data |>
@@ -91,7 +249,8 @@ grand_age_mean <- mean(df_arms$age_mean, na.rm = TRUE)
 
 # ── 3. Build contrasts ──────────────────────────────────────────────────────
 df_contrasts <- df_arms |>
-  group_by(short_cite, compare_group, vocab_type) |>
+  group_by(short_cite, compare_group, vocab_type, vocab_units, 
+           infant_typical, assessment_procedure) |> # include for more moderators
   group_modify(function(grp, key) {
     
     mono    <- grp |> filter(nma_arm == 1L)
@@ -181,46 +340,171 @@ lost <- anti_join(
 if (nrow(lost) > 0) message("Studies with no valid contrasts: ",
                             paste(lost$short_cite, collapse = ", "))
 
-# ── 5. Covariate matrix ─────────────────────────────────────────────────────
-X <- model.matrix(~ age_c + vocab_type, data = df_contrasts)[, -1, drop = FALSE]
+####### BELOW UNTESTED
 
-N_ppt <- max(c(df_contrasts$ppt_trt_id, df_contrasts$ppt_ref_id))
+# ── 5. Build stan_data for a given moderator formula ────────────────────────
+build_stan_data <- function(df_contrasts, formula = ~ 1) {
+  
+  # ~ 1 gives an intercept-only matrix; drop it to get 0 columns
+  X <- model.matrix(formula, data = df_contrasts)
+  X <- X[, setdiff(colnames(X), "(Intercept)"), drop = FALSE]
+  
+  if (nrow(df_contrasts) != nrow(X)) {
+    stop("Mismatch in nrow between df_contrasts and X")
+  }
+  
+  N_ppt <- max(c(df_contrasts$ppt_trt_id, df_contrasts$ppt_ref_id))
+  
+  list(
+    N_obs      = nrow(df_contrasts),
+    N_study    = n_distinct(df_contrasts$study_id),
+    N_ppt      = N_ppt,
+    K          = 4L,
+    P          = ncol(X),
+    
+    y          = df_contrasts$y,
+    se_y       = df_contrasts$se_y,
+    
+    arm_trt    = df_contrasts$arm_trt,
+    arm_ref    = df_contrasts$arm_ref,
+    study_id   = df_contrasts$study_id,
+    ppt_trt_id = df_contrasts$ppt_trt_id,
+    ppt_ref_id = df_contrasts$ppt_ref_id,
+    paired     = df_contrasts$paired,
+    
+    X          = X
+  )
+}
 
-# ── 6. Stan data list ───────────────────────────────────────────────────────
-stan_data <- list(
-  N_obs      = nrow(df_contrasts),
-  N_study    = n_distinct(df_contrasts$study_id),
-  N_ppt      = N_ppt,
-  K          = 4L,   # 1=mono, 2=bi_L1, 3=bi_total, 4=bi_conceptual
-  P          = ncol(X),
-  
-  y          = df_contrasts$y,
-  se_y       = df_contrasts$se_y,
-  
-  arm_trt    = df_contrasts$arm_trt,
-  arm_ref    = df_contrasts$arm_ref,
-  study_id   = df_contrasts$study_id,
-  ppt_trt_id = df_contrasts$ppt_trt_id,
-  ppt_ref_id = df_contrasts$ppt_ref_id,
-  paired     = df_contrasts$paired,
-  
-  X          = X
-)
-
-# ── 7. Fit model ────────────────────────────────────────────────────────────
 mod <- cmdstan_model("nma_bilingual.stan")
 
-fit <- mod$sample(
-  data            = stan_data,
-  seed            = 42,
-  chains          = 4,
-  parallel_chains = 4,
-  iter_warmup     = 1000,
-  iter_sampling   = 2000,
-  adapt_delta     = 0.95
+# ── 6. Fit models ───────────────────────────────────────────────────────────
+model_specs <- list(
+  base                  = ~ 1,
+  age                   = ~ age_c,
+  vocab_type            = ~ vocab_type,
+  infant_typical        = ~ infant_typical,
+  assessment_procedure  = ~ assessment_procedure
 )
 
-# ── 8. Results ──────────────────────────────────────────────────────────────
-df_res <- fit$summary(c("mu_d", "tau", "Omega", "beta",
-                        "sigma_within", "sigma_ppt", "sigma_add_paired", "sigma_add_unpaired",
-                        "d_total_vs_L1", "d_conceptual_vs_L1", "d_conceptual_vs_total"))
+fit_one <- function(spec_formula) {
+  stan_data <- build_stan_data(df_contrasts, spec_formula)
+  mod$sample(
+    data            = stan_data,
+    seed            = 42,
+    chains          = 4,
+    parallel_chains = 4,
+    iter_warmup     = 1000,
+    iter_sampling   = 2000,
+    adapt_delta     = 0.95
+  )
+}
+
+fits <- map(model_specs, fit_one)
+saveRDS(fits, here("outputs", "fits.rds"))
+
+# ── 7. Results ──────────────────────────────────────────────────────────────
+
+summarise_fit <- function(fit, spec_name, draws = FALSE) {
+  vars <- c("mu_d", "tau", "Omega", "sigma_within", "sigma_ppt",
+            "d_total_vs_L1", "d_conceptual_vs_L1", "d_conceptual_vs_total")
+  
+  # add beta only if the model had moderators
+  if (any(grepl("^beta", fit$metadata()$stan_variables)))
+    vars <- c(vars, "beta")
+  
+  if (draws) {
+    fit$draws(vars) |> 
+      as_tibble() |> 
+      mutate(model = spec_name, .before = 1)
+  } else {
+    fit$summary(
+      vars,
+      mean, median, sd, mad,
+      \(x) posterior::quantile2(x, probs = c(0.025, 0.975)),
+      posterior::default_convergence_measures()
+    ) |>
+      mutate(model = spec_name, .before = 1)
+  }
+}
+
+df_res_all <- imap(fits, summarise_fit) |> bind_rows()
+write_csv(df_res_all, "df_res_all.csv")
+
+df_draws <- imap(fits, \(f, n) summarise_fit(f, n, draws = TRUE)) |> bind_rows()
+
+df_res_all |> 
+  separate_wider_delim(variable, delim = "[", too_few = "align_start", 
+                       names = c("variable", "comparison")) |> 
+  filter(variable != "Omega",
+         !str_starts(variable, "d_")) |> 
+  mutate(comparison = str_remove_all(comparison, "(,1)?]") |> 
+           factor(levels = c(1, 2, 3),
+                  labels = c("single-language", "total", "conceptual")),
+         model = factor(model, 
+                        levels = c("base", "age", "vocab_type", 
+                                   "assessment_procedure", "infant_typical")),
+         variable = factor(variable, 
+                           levels = c("mu_d", "sigma_within", "sigma_ppt", 
+                                      "tau", "beta"),
+                           labels = c("Hedge's g", "Within corr var", 
+                                      "Between var", "Heterogeneity", 
+                                      "Regression coef")) |> 
+           fct_rev()) |> 
+  ggplot(aes(x = mean, y = variable, col = comparison)) +
+  geom_vline(xintercept = 0, lty = "dashed") +
+  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), height = 0) +
+  geom_point() +
+  facet_grid(~ model) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = "bottom")
+
+
+# # ── 5. Covariate matrix ─────────────────────────────────────────────────────
+# X <- model.matrix(~ age_c + vocab_type + infant_typical + assessment_procedure, 
+#                   data = df_contrasts)[, -1, drop = FALSE]
+# if (nrow(df_contrasts) != nrow(X)) stop("Mismatch in nrow between df_contrasts and X")
+# 
+# N_ppt <- max(c(df_contrasts$ppt_trt_id, df_contrasts$ppt_ref_id))
+# 
+# # ── 6. Stan data list ───────────────────────────────────────────────────────
+# stan_data <- list(
+#   N_obs      = nrow(df_contrasts),
+#   N_study    = n_distinct(df_contrasts$study_id),
+#   N_ppt      = N_ppt,
+#   K          = 4L,   # 1=mono, 2=bi_L1, 3=bi_total, 4=bi_conceptual
+#   P          = ncol(X),
+#   
+#   y          = df_contrasts$y,
+#   se_y       = df_contrasts$se_y,
+#   
+#   arm_trt    = df_contrasts$arm_trt,
+#   arm_ref    = df_contrasts$arm_ref,
+#   study_id   = df_contrasts$study_id,
+#   ppt_trt_id = df_contrasts$ppt_trt_id,
+#   ppt_ref_id = df_contrasts$ppt_ref_id,
+#   paired     = df_contrasts$paired,
+#   
+#   X          = X
+# )
+# 
+# # ── 7. Fit model ────────────────────────────────────────────────────────────
+# mod <- cmdstan_model("nma_bilingual.stan")
+# 
+# fit <- mod$sample(
+#   data            = stan_data,
+#   seed            = 42,
+#   chains          = 4,
+#   parallel_chains = 4,
+#   iter_warmup     = 1000,
+#   iter_sampling   = 2000,
+#   adapt_delta     = 0.95
+# )
+# 
+# # ── 8. Results ──────────────────────────────────────────────────────────────
+# df_res <- fit$summary(c("mu_d", "tau", "Omega", "beta",
+#                         "sigma_within", "sigma_ppt", # "sigma_add_paired", "sigma_add_unpaired",
+#                         "d_total_vs_L1", "d_conceptual_vs_L1", "d_conceptual_vs_total"),
+#                       mean, median, sd, mad, \(x) posterior::quantile2(x, probs = c(0.025, 0.975)),
+#                       posterior::default_convergence_measures())

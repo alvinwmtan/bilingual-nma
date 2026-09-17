@@ -1,0 +1,384 @@
+---
+title: "Data processing"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(here)
+```
+
+# Load data
+```{r}
+ss <- "1Bv0_BjwayZBXeYDtM439AdTjKdH16fvQfarGahmzVSc"
+df_data_a <- read_sheet(ss, "Alvin")
+df_data_g <- read_sheet(ss, "Gianmatteo")
+df_data_f <- read_sheet(ss, "Federica")
+df_main <- read_sheet(ss, "main")
+
+clean_df <- function(df_dat) {
+  df_dat |> 
+    filter_out(str_detect(has_full_text, "exclude"),
+               str_detect(compare_group, "exclude")) |> 
+    mutate(across(where(is.list), 
+                  \(x) map_dbl(x, \(y) ifelse(is.null(y) || is.na(y), NA, 
+                                              y |> str_remove(" \\(.*\\)") |> as.numeric()))),
+           notes = coalesce(notes, `...35`),
+           across(where(is.character), \(x) na_if(x, "/"))) |> 
+    select(-`...35`)
+}
+
+df_data_f <- bind_rows(
+  df_data_f |> 
+    mutate(compare_group = map(
+      compare_group, 
+      \(x) ifelse(is.null(x), NA,
+                  replace_values(as.character(x),
+                                 "1 & 2" ~ "1",
+                                 "3 & 4" ~ "3",
+                                 "5 & 6" ~ "5"
+                  )))),
+  df_data_f |> 
+    filter(map_lgl(compare_group, \(x) ifelse(is.null(x), FALSE, str_detect(x, " & ")))) |> 
+    mutate(compare_group = map(
+      compare_group, 
+      \(x) ifelse(is.null(x), NA,
+                  replace_values(as.character(x),
+                                 "1 & 2" ~ "2",
+                                 "3 & 4" ~ "4",
+                                 "5 & 6" ~ "6"
+                  ))))
+)
+
+df_data_raw <- bind_rows(
+  df_data_a |>
+    filter(is.na(exclusion_reason)),
+  clean_df(df_data_g),
+  clean_df(df_data_f)
+) |> 
+  select(-starts_with("clt_"))
+```
+
+# Exclusions
+```{r}
+df_exclusions <- bind_rows(
+  df_data_a |> 
+    filter(!is.na(exclusion_reason)) |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    select(long_cite, short_cite, has_full_text, compare_group, exclusion_reason, notes),
+  df_data_g |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    filter(str_detect(has_full_text, "exclude") |
+             str_detect(compare_group, "exclude") |
+             notes == "no comparison") |> 
+    select(long_cite, short_cite, has_full_text, compare_group, notes),
+  df_data_f |> 
+    mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
+    filter(str_detect(has_full_text, "exclude") |
+             str_detect(compare_group, "exclude") |
+             notes == "no comparison") |> 
+    select(long_cite, short_cite, has_full_text, compare_group, notes),
+) |> 
+  mutate(exclusion_reason = case_when(
+    !is.na(exclusion_reason) ~ exclusion_reason,
+    notes == "no comparison" ~ "no comparison",
+    str_detect(compare_group, "exclude") ~ compare_group,
+    str_detect(has_full_text, "exclude") ~ has_full_text,
+    has_full_text == "no" ~ "no full text",
+    .default = NA
+  )) |> 
+  select(long_cite, short_cite, exclusion_reason) |> 
+  bind_rows(df_main |> 
+              mutate(has_full_text = str_replace_all(has_full_text, "(exclue|exlculde|excude)", "exclude")) |> 
+              filter(str_detect(str_to_lower(has_full_text), "exclude")) |> 
+              select(long_cite, short_cite, exclusion_reason = has_full_text)) |> 
+  distinct() |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(exclusion_reason = str_c(exclusion_reason, collapse = " / "),
+            .groups = "drop") |> 
+  mutate(exclusion_reason = exclusion_reason |> str_to_lower() |> str_remove_all("exclude(d) ?"))
+
+write_csv(df_exclusions |> select(exclusion_reason) |> distinct(), here("data", "exclusions.csv"))
+df_exclusions_cleaned <- read_csv(here("data", "exclusions_cleaned.csv"))
+df_exclusions <- df_exclusions |> 
+  mutate(exclusion_reason = str_replace(exclusion_reason, " / $", " /")) |> 
+  left_join(df_exclusions_cleaned, by = join_by(exclusion_reason))
+df_exclusion_summary <- df_exclusions |> 
+  group_by(exclusion_reason_cleaned) |> 
+  summarise(n = n())
+df_data_raw <- df_data_raw |> 
+  filter(!(long_cite %in% df_exclusions$long_cite))
+
+# sanity check
+df_main |> 
+  filter(!long_cite %in% c(df_data_raw$long_cite, df_exclusions$long_cite),
+         !inclusion_decision_new %in% c("E+E", "M+E")) |> 
+  View()
+```
+
+# Standardisation
+```{r}
+clean_lang <- function(lang) {
+  lang |> 
+    str_replace_all("French, English,  \\(n = 1 Hebrew, n = 1 Turkish, and n = 4 Italian\\)", "various") |> 
+    str_remove_all(" ?\\(.*\\) ?") |> 
+    str_remove_all("\"]") |> 
+    str_remove_all("-speaking") |> 
+    str_replace_all("( and |, | or )", "/") |> 
+    str_remove_all("\\.$") |> 
+    str_remove_all("[0-9]+%? ?") |> 
+    replace_when(
+      str_detect(lang, "([Dd]ifferent|mixed|[Oo]ther|:|non-?English|Moroccan)") ~ "various",
+      str_detect(lang, "(^/$|^na|^n=|Not reported)") ~ NA,
+      str_detect(lang, "Peruvian") ~ "Quechua/Spanish",
+      lang == "english" ~ "English"
+    )
+}
+
+df_data_cleaned <- df_data_raw |> 
+  mutate(
+    lang_group = lang_group |> 
+      str_to_lower() |> 
+      str_replace_all(
+        c(" \\(.*" = "",
+          "multi/bilingual" = "multilingual",
+          "bilngual" = "bilingual")
+      ),
+    vocab_measure = vocab_measure |> 
+      str_to_lower() |> 
+      str_replace_all(
+        c(
+          " vocabulary" = "",
+          " spe" = "-spe",
+          " \\(english\\)" = "",
+          "cifc" = "cific"
+        )
+      ) |> na_if("/"),
+    vocab_measure = ifelse(lang_group == "monolingual" & is.na(vocab_measure),
+                           "language-specific", vocab_measure),
+    across(c(L1, L2), clean_lang),
+    N = str_remove_all(N, " \\(.*\\)"),
+    assessment_tool_L1 = na_if(assessment_tool_L1, "na"),
+    assessment_tool_L1 = na_if(assessment_tool_L1, "Not reported"),
+    assessment_tool_L2 = na_if(assessment_tool_L2, "na")) |> 
+  filter(vocab_type %in% c("receptive", "expressive"))
+
+df_data_cleaned |> 
+  select(infant_type, L1, L2, is_plurilingual, bilingual_type, 
+         country, assessment_tool_L1, assessment_tool_L2, vocab_units) |> 
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value") |> 
+  mutate(variable = replace_values(variable,
+                                   c("L1", "L2") ~ "lang",
+                                   c("assessment_tool_L1", "assessment_tool_L2") ~ "assessment_tool")) |> 
+  distinct() |> 
+  arrange(variable, value) |> 
+  write_csv(here("data", "variable_mapping.csv"))
+
+var_map <- read_csv(here("data", "variable_mapping_std.csv")) |> 
+  mutate(variable = map(variable, \(v) {
+    if (v == "lang") return(c("L1", "L2"))
+    if (v == "assessment_tool") return(c("assessment_tool_L1", "assessment_tool_L2"))
+    v
+  })) |> 
+  unnest(variable)
+
+df_data_std <- df_data_cleaned |> 
+  pivot_longer(cols = c(infant_type, L1, L2, is_plurilingual, bilingual_type, 
+                        country, assessment_tool_L1, assessment_tool_L2, vocab_units), 
+               names_to = "variable", values_to = "value") |> 
+  left_join(var_map, by = join_by(variable, value)) |> 
+  select(-value) |> 
+  pivot_wider(names_from = variable, values_from = std_value)
+```
+
+```{r}
+df_data <- df_data_std |>
+  mutate(
+    N                = as.numeric(N),
+    vocab_score_mean = as.numeric(vocab_score_mean),
+    vocab_score_sd   = as.numeric(vocab_score_sd),
+    age_mean         = as.numeric(age_mean) |> 
+      coalesce(rowMeans(cbind(age_max, age_min))),
+    infant_typical   = infant_type == "typical"
+  )
+
+saveRDS(df_data, here("outputs", "df_data.rds"))
+```
+
+# Descriptives
+
+## General
+
+```{r}
+df_data$long_cite |> n_distinct()
+```
+
+```{r}
+sum_n <- df_data |> 
+  group_by(long_cite, short_cite, ppt_group) |> 
+  slice_max(N, with_ties = FALSE) |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(N = sum(N), .groups = "drop")
+
+sum_n$N |> range()
+sum_n$N |> mean()
+sum_n$N |> median()
+sum_n$N |> sum()
+sum_n |> filter(N >= 50) |> nrow()
+sum_n |> filter(N >= 100) |> nrow()
+```
+
+```{r}
+sum_age <- df_data |> 
+  group_by(long_cite, short_cite, ppt_group) |> 
+  slice(1) |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(age_mean = mean(age_mean), .groups = "drop")
+
+sum_age$age_mean |> range()
+sum_age$age_mean |> mean()
+sum_age$age_mean |> median()
+```
+
+```{r}
+sum_typical <- df_data |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(all_typical = all(infant_typical == 1),
+            typ_atyp = any(infant_typical == 1) & any(infant_typical == 0),
+            all_atypical = all(infant_typical == 0),
+            .groups = "drop")
+
+sum_typical$all_typical |> sum()
+sum_typical$typ_atyp |> sum()
+sum_typical$all_atypical |> sum()
+```
+
+## Languages
+
+```{r}
+lang_fam <- read_csv(here("data", "language_families.csv"))
+
+sum_lang <- df_data |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(all_lang = paste(L1, L2, sep = ",", collapse = ",") |> 
+              str_split(","),
+            .groups = "drop") |> 
+  unnest(all_lang) |> 
+  filter(all_lang != "NA") |> 
+  distinct()
+
+sum_sum_lang <- sum_lang |> 
+  count(all_lang) |> 
+  arrange(desc(n)) |> 
+  mutate(all_lang = replace_values(all_lang, "zzz" ~ "various")) |> 
+  left_join(lang_fam, by = join_by(all_lang == lang)) |> 
+  mutate(all_lang = fct_reorder(all_lang, desc(n)))
+
+sum_fam_lang <- sum_sum_lang |> 
+  group_by(family) |> 
+  summarise(n = sum(n),
+            n_lang = n())
+
+sum_sum_lang <- sum_sum_lang |> 
+  mutate(family_collapsed = case_when(
+           str_starts(family, "IE: [CSAH]") ~ "IE: Other",
+           is.na(family) ~ NA,
+           family %in% (sum_fam_lang |> filter(n_lang <= 2) |> pull(family)) ~ "Other",
+           .default = family
+         ) |> factor(levels = c("IE: Germanic", "IE: Romance", "IE: Indo-Iranian", "IE: Other",
+                                "Semitic", "Sinitic", "Other")))
+
+# add colour based on language family
+sum_sum_lang |> 
+  ggplot(aes(x = all_lang, y = n, fill = family_collapsed)) +
+  geom_col() +
+  labs(x = "Language", y = "Number of studies", fill = "Language family") +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "inside",
+        legend.position.inside = c(.88, .67))
+```
+
+```{r}
+sum_langp <- df_data |> 
+  mutate(across(c(L1, L2), \(l) str_split(l, ","))) |> 
+  unnest(c(L1, L2)) |> 
+  mutate(langp = map2_chr(L1, L2, \(a, b) {
+    if (is.na(a) | is.na(b)) NA_character_
+    else if (a < b) paste(a, b, sep = "/")
+    else paste(b, a, sep = "/")
+  })) |> 
+  select(long_cite, short_cite, langp) |> 
+  distinct() |> 
+  filter(!is.na(langp))
+
+sum_sum_langp <- sum_langp |> 
+  count(langp) |> 
+  arrange(desc(n)) |> 
+  mutate(langp = str_replace_all(langp, "zzz", "various"))
+```
+
+```{r}
+sum_plur <- df_data |> 
+  select(long_cite, short_cite, is_plurilingual) |> 
+  distinct() |> 
+  group_by(is_plurilingual) |> 
+  summarise(n = n())
+```
+
+## Assessments
+
+```{r}
+sum_domain <- df_data |> 
+  select(long_cite, short_cite, vocab_type) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_type, values_from = value)
+
+sum_domain$receptive |> is.na() |> sum()
+sum_domain$expressive |> is.na() |> sum()
+sum(sum_domain$receptive & sum_domain$expressive, na.rm = T)
+```
+
+```{r}
+sum_measure <- df_data |> 
+  filter(lang_group != "monolingual") |> 
+  select(long_cite, short_cite, vocab_measure) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_measure, values_from = value)
+
+sum_measure$`language-specific` |> sum(na.rm = T)
+sum_measure$conceptual |> sum(na.rm = T)
+sum_measure$total |> sum(na.rm = T)
+sum(rowSums(sum_measure |> select(`language-specific`, conceptual, total), na.rm = T) > 1)
+```
+
+```{r}
+sum_inst <- df_data |> 
+  select(long_cite, short_cite, assessment_procedure) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = assessment_procedure, values_from = value)
+
+sum_inst$indirect |> sum(na.rm = T)
+sum_inst$direct |> sum(na.rm = T)
+sum(rowSums(sum_inst |> select(indirect, direct), na.rm = T) > 1)
+```
+
+```{r}
+sum_units <- df_data |> 
+  select(long_cite, short_cite, vocab_units) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_units, values_from = value)
+
+sum_units$rawscore |> sum(na.rm = T)
+sum_units$proportion |> sum(na.rm = T)
+sum_units$`standard score` |> sum(na.rm = T)
+sum_units$percentile |> sum(na.rm = T)
+sum(rowSums(sum_units |> select(rawscore, proportion, `standard score`, percentile), na.rm = T) > 1)
+```
+
