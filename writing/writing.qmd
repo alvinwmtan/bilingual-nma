@@ -1,0 +1,493 @@
+---
+title: "Measuring bilingual vocabulary: A systematic review and meta-analysis"
+shorttitle: "Bilingual vocabulary meta-analysis"
+author:
+  - name: Alvin Wei Ming Tan
+    corresponding: true
+    orcid: 0000-0001-5551-7507
+    email: tanawm@stanford.edu
+    affiliations:
+      - name: Stanford University
+        department: Department of Psychology
+        address: 450 Jane Stanford Way
+        city: Stanford
+        region: CA
+        country: USA
+        postal-code: 94305
+  - name: Gianmatteo Farabolini
+    orcid: 0000-0003-4732-155X
+    affiliations: 
+      - name: Università Politecnica delle Marche
+        department: Department of Experimental and Clinical Medicine
+author-note:
+  status-changes: 
+    affiliation-change: ~
+    deceased: ~
+  disclosures:
+    study-registration: ~
+    data-sharing: ~
+    related-report: ~
+    conflict-of-interest: ~
+    financial-support: ~
+    gratitude: ~
+    authorship-agreements: ~
+abstract: "This document is a template."
+impact-statement: "This template helps you get started."
+# Optional pointer to supplemental materials, shown below the keywords.
+# supplemental-materials: "Data and code are at <https://example.org/>"
+keywords: [Keyword 1, Keyword 2, Keyword 3]
+bibliography: bibliography.bib
+fig-align: center
+format:
+  apaquarto-html: default
+  apaquarto-docx: default
+  apaquarto-typst: 
+    documentmode: journal
+  apaquarto-pdf:
+    documentmode: manuscript
+---
+
+```{r global_options, include=F}
+knitr::opts_chunk$set(
+  fig.pos = "tb", fig.path = 'figs/',
+  fig.align = "center",
+  echo = F, warning = F, cache = F, 
+  message = F, sanitize = T
+)
+options(
+  readr.show_col_types = FALSE,
+  scipen = 2, digits = 2
+)
+```
+
+```{r setup}
+library(tidyverse)
+library(here)
+library(glue)
+library(patchwork)
+
+source("plot_helpers.R")
+
+theme_set(
+  theme_bw(base_family = "Open Sans") +
+  theme(panel.grid = element_blank())
+)
+```
+
+```{r data-loading}
+df_data <- readRDS(here("outputs", "df_data.rds"))
+df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
+mod_full <- readRDS(here("outputs", "fits.rds"))$full
+df_res_all <- read_csv(here("outputs", "df_res_all.csv"))
+
+comp_lab <- c(
+  `1` = "Bi-LS",
+  `2` = "Bi-TV",
+  `3` = "Bi-CV"
+)
+```
+
+
+Vocabulary measurement is an important component of understanding language development throughout childhood (see e.g., NIHT PVT, ROAR/LEVANTE), and has been used widely for describing lexical development trajectories (e.g., wb book), evaluating the effectiveness of interventions (e.g., CITE), and assessing possible language-related difficulties (e.g., CITE), across a variety of settings and contexts. 
+
+One particularly interesting context is that of children learning two (or more) languages. Bilingual lexical development has been measured using vocabulary size across the span of childhood (Weisleder et al., 2024; Zhang et al., 2024; Dosi & Papadopoulou, 2020; Schaefer et al., 2016; Verbeek et al., 2023). To assess children's relative lexical abilities, bilingual children's vocabularies would ideally be compared against normative data to derive a standard score or percentile. However, there are few standardised assessment tools (Floccia et al., 2018; Peña, 2016), and they are rarely available especially for underrepresented populations or disadvantaged contexts. Indeed, considering the vast number of possible multi-language combinations means that developing a new set of norms for every language pair is practically impossible. 
+
+When there are no bilingual normative data for a target population in a specific context, vocabulary assessment is often compared against monolingual norms (Ehl et al., 2020; Weisleder et al., 2024). There are important methodological limitations associated with this approach—for example, bilingual and monolingual children have vastly different early language environments and may thus not be meaningfully comparable (Houwer, 2023; Ortiz & Cehelyk, 2023; Rothman et al., 2023). Nonetheless, such comparison remains a common method when alternatives are not available (e.g., in clinical settings). In this approach, researchers and practitioners are faced with important considerations for the type of vocabulary measure to use for bilinguals. One option is to use a single language to assess bilinguals—typically the same language used to assess monolinguals, which is often the majority language used in the community. However, this typically results in an underestimation of bilinguals' language ability (Floccia et al., 2018; Peña, 2016; Weisleder et al., 2024) and is generally not recommended. 
+
+Alternatively, researchers can integrate bilingual children's vocabularies in both of their languages, estimating their conceptual vocabulary or their total vocabulary. The distinction between these measures lies in the consideration of translation equivalents—lexical items from different languages that convey the same semantic concept. For instance, the English word dog and the French word chien are considered translation equivalents because they refer to the same concept. Conceptual vocabulary reflects the number of distinct lexical concepts known by the child, irrespective of the language used to express them; therefore, knowledge of both dog and chien would contribute only once to the conceptual vocabulary score. In contrast, total vocabulary represents the overall number of lexical items known across languages, independently of semantic overlap. Accordingly, if a child knows the word for dog in two languages, both lexical items are counted separately in the total vocabulary score (e.g., Pearson et al., 1993).
+
+Choosing the most appropriate measure for estimating bilingual vocabulary remains an important debated issue (Bedore et al., 2005; Core et al., 2013; Cote & Bornstein, 2014; Ehl et al., 2020; Weisleder et al., 2024). Lexical developmental trajectories of bilingual children resemble those observed in monolingual peers when conceptual vocabulary scores are adopted (e.g., De Houwer et al., 2014; Ehl et al., 2020). At the same time, other findings support the use of total vocabulary measures, reporting comparable expressive vocabulary outcomes between bilingual and monolingual children (e.g., Core et al., 2013; Hoff et al., 2012). 
+
+## Potential moderators on the relationship between monolinguals' and bilinguals' vocabulary
+
+Furthermore, bilingual vocabulary measurement may also be influenced by a number of potential moderators. First, expressive and receptive vocabularies may follow different developmental paths. A study of French–English bilinguals found that they had similarly sized receptive conceptual vocabularies as monolinguals, but smaller expressive conceptual vocabularies (Byers-Heinlein et al., 2024). Similar effects have also been found for Spanish–English simultaneous bilinguals (Gross et al., 2014). One possible explanation is that the relationship between amount of exposure and vocabulary size differs for expressive and receptive vocabulary, such that bilingual children need comparatively more exposure to match their monolingual counterparts in expressive vocabulary (Thordardottir, 2011). 
+
+Second, age may be an important factor in determining the suitability of different bilingual vocabulary measures. Longitudinal studies of bilingual children have suggested that total vocabulary and conceptual vocabulary grow at different rates over age, with total vocabulary diverging more from monolingual references at older ages (Core et al., 2013; Siow et al., 2023), as has a large study using archival data (Byers-Heinlein et al., 2024), although many of these studies have primarily focused on children younger than the age of three. More evidence is needed to understand how bilingual vocabularies develop over a wider age range. 
+
+Finally, language similarity is often analysed to consider the proximity between a bilingual's two languages in terms of shared psycholinguistic features (Borodkin et al., 2022). For example, language similarity seems to be related to the underlying mechanisms of selective attention with higher scores collected by Dutch–English bilinguals compared to Spanish–English peers (Olguin et al., 2019). Also, French–Italian bilinguals obtain higher scores than German–Italian bilingual children on a picture–auditory word recognition task in a lexical access study (Persici et al., 2019), and language similarity is also related to higher bilingual vocabulary scores (Gampe et al., 2021). Moreover, transitional equivalents sharing a similar lexical form have been found to occur more frequently in the early lexical development of German–English bilingual toddlers (Schelletter, 2002), supporting the hypothesis that lexical similarity may contribute to promote bilingual lexical development.
+
+Other factors may also moderate the relationship between bilingual and monolingual vocabularies. For example, whether the measurement instrument is indirect (parent-report checklists) or direct (in-lab experiment) may influence the measurement properties of different bilingual vocabulary measures. As many studies in bilingual language development have employed only one type of instrument, individual studies may not be able to shed light on the role of the measurement instrument.
+
+## The current study
+
+As observed by Weisleder et al. (2024), in studies of bilingual language development, there is significant heterogeneity in researcher choices about which language measures to use, whether expressive or receptive vocabulary is measured, and the population of bilinguals sampled. Thus, in the current study, we aim to synthesise the evidence regarding bilingual and monolingual vocabulary measurement through a systematic review and network meta-analysis. 
+
+Specifically, we considered the following preregistered research questions (RQs):
+
+1. What are the differences between monolinguals' and bilinguals' vocabulary? How does this depend on which vocabulary measure is used?
+2. What is the effect of age on the relationship between monolinguals' and bilinguals' vocabulary?
+3. What is the effect of vocabulary domain (receptive vs expressive) on the relationship between monolinguals' and bilinguals' vocabulary?
+4. What is the effect of the instrument (direct vs indirect tools) on the relationship between monolinguals' and bilinguals' vocabulary?
+
+We also considered the following exploratory research questions
+
+5. What is the effect of development typicality (typical vs atypical) on the relationship between monolinguals' and bilinguals' vocabulary?
+6. What is the effect of language similarity on the relationship between monolinguals' and bilinguals' vocabulary?
+
+# Method
+
+The research design followed the "Preferred Reporting Items for Systematic Reviews and
+Meta-Analyses" (PRISMA) guidelines for systematic reviews and meta-analyses (Liberati et al., 2009). The current study was registered in the "International Prospective Register of Systematic Reviews" (PROSPERO; CRD42021248015). 
+
+## Systematic review
+
+### Search and screening protocol
+
+We used four open-access databases for literature searching: ERIC, PubMed, PsycInfo, and Google Scholar.  We employed a broad search strategy using the following keywords: (bilingual OR multilingual OR plurilingual) AND (vocabulary) AND (infant* OR toddler* OR child*). The search was conducted in May 2024. We also included records obtained from expert recommendations and hand searching.
+Literature screening was carried out following these steps: abstract retrieval, abstract screening, full text retrieval and full text screening. Double-blind study selection at abstract level was performed by two independent screeners (GF and AWMT). Once the literature search and screening were finished, the first and second authors compared their inclusion decisions and, when needed, reached an agreement through a consensus process. Finally, full-text screening was carried out by one independent reviewer (GF, AWMT, or FM). 
+
+### Inclusion and exclusion criteria
+
+We included studies based on a set of criteria following the PICOS framework:
+
+**Population.** We included studies on children who were (a) younger than 18 years of age, (b) exposed to at least two languages from their first years of life, and (c) not reported to have cognitive, neurosensory, or psychiatric disorders. We also excluded studies on children who were internationally adopted, as it was difficult to determine the "bilingual" status of these children, who typically did not receive further input in their native language.
+
+**Intervention & comparison.** We included studies that (a) compared bilingual children to monolingual children or norms (in at least one of the languages spoken by the bilingual sample), and/or (b) compared different vocabulary measures within the sample of bilingual children (total or conceptual vocabulary). 
+
+**Outcome.** We included studies that investigated receptive and/or expressive vocabulary in the languages that the children were acquiring. We included studies that used either direct (e.g., looking while listening tasks) or indirect (e.g., parent-report estimates) measures of children's vocabulary. 
+
+**Study type.** We included experimental, quasi-experimental, and observational studies, and excluded opinion and review articles. 
+
+In sum, studies included in the systematic review should a) include direct and/or indirect measurements of receptive and/or expressive vocabulary in the languages spoken by the child, b) compare bilingual lexical data to monolingual data (in at least one of the languages spoken by the bilingual sample) and/or compare different vocabulary measures for bilingual children (total vocabulary, conceptual vocabulary, or single-language vocabulary). 
+
+### Data extraction
+
+For included articles, we extracted article metadata, sample demographics, and vocabulary assessment data, with one row per vocabulary size measurement. Specifically, concerning demographics, we extracted data on the sample size, age, language(s) received, bilingual type (simultaneous or sequential), and country of origin. Regarding vocabulary assessments, we extracted the vocabulary assessment tool, the vocabulary domain assessed (expressive or receptive), the vocabulary measure for bilinguals (single-language, conceptual, or total), and the units of measurement (raw score, proportions, percentiles, or standardized scores). Vocabulary sizes were recorded as means and standard deviations. The codebook for our data extraction can be found at [URL].
+
+## Network meta-analysis
+We prepared the extracted data for network meta-analysis by converting them into pairwise contrasts. If studies contained at least one monolingual sample, we constructed pairwise contrasts between monolingual samples and all bilingual samples that share a language with that monolingual sample. Otherwise, we constructed non-redundant pairwise contrasts among bilingual vocabulary measures (e.g., single-language vs conceptual).
+
+To integrate and analyse data from a range of disparate designs, we opted to use a network meta-regression with four nodes: monolingual vocabulary, bilingual single-language vocabulary, bilingual total vocabulary, and bilingual conceptual vocabulary. Data were entered as pairwise contrasts between nodes, operationalised as standardised mean differences using Hedges' $g$, with monolinguals as the network reference level; Hedges' $g$ was calculated from vocabulary means and standard deviations for `r df_contrasts |> filter(!is.na(sd_trt)) |> nrow()` pairwise contrasts, and from t-statistics for `r df_contrasts |> filter(is.na(sd_trt)) |> nrow()` pairwise contrasts. We included random intercepts for study and cohort, and included deviations for multiple correlated measurements from the same bilingual sample. 
+
+Meta-regression was represented by node-specific covariate coefficients, with the coefficients for monolinguals fixed at zero. We included all covariates (age, domain, instrument, typicality, and language distance) after mean-centring and scaling numeric variables. Binary variables were operationalised with sum contrasts.
+
+We used weakly informative priors for the parameters (detailed in @apx-model), and fit the model using Markov chain Monte Carlo simulations. We tested for model convergence using the Brooks–Gelman–Rubin method. The full mathematical formulation of the model can be found in @apx-model. 
+
+To test RQ1, we focused on three basic comparisons: monolingual vs bilingual total vocabulary, monolingual vs bilingual conceptual vocabulary, and monolingual vs bilingual single-language vocabulary. We assessed heterogeneity using the $I^2$ score, and tested for potential inconsistencies using node-splitting analysis. We reported posterior medians and 95% highest density credible intervals (CrIs). We evaluated each basic comparison by determining whether the 95% CrIs of the posterior overlapped with zero. 
+
+To test RQ2–6, we evaluated each covariate by determining whether the 95% CrIs of the moderator posteriors overlapped with zero. 
+
+All analyses were conducted using Stan via the `cmdstanr` package in R. 
+
+# Results
+
+## Systematic review
+
+```{r descriptives}
+descriptives_lang <- read_csv(here("outputs", "descriptives_lang.csv")) |> 
+  mutate(all_lang = fct_reorder(all_lang, desc(n)))
+descriptives_lang_pairs <- read_csv(here("outputs", "descriptives_lang_pairs.csv"))
+
+print_lp <- function(lang_pair) {
+  descriptives_lang_pairs |> 
+    filter(langp == lang_pair) |> 
+    pull(n)
+}
+
+sum_n <- df_data |> 
+  group_by(long_cite, short_cite, ppt_group) |> 
+  slice_max(N, with_ties = FALSE) |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(N = sum(N), .groups = "drop")
+
+sum_age <- df_data |> 
+  group_by(long_cite, short_cite, ppt_group) |> 
+  slice(1) |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(age_mean = mean(age_mean), .groups = "drop")
+
+sum_typical <- df_data |> 
+  group_by(long_cite, short_cite) |> 
+  summarise(all_typical = all(infant_typical == 1),
+            typ_atyp = any(infant_typical == 1) & any(infant_typical == 0),
+            all_atypical = all(infant_typical == 0),
+            .groups = "drop")
+
+sum_plur <- df_data |> 
+  select(long_cite, short_cite, is_plurilingual) |> 
+  distinct() |> 
+  group_by(is_plurilingual) |> 
+  summarise(n = n())
+
+sum_domain <- df_data |> 
+  select(long_cite, short_cite, vocab_type) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_type, values_from = value)
+
+sum_measure <- df_data |> 
+  filter(lang_group != "monolingual") |> 
+  select(long_cite, short_cite, vocab_measure) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_measure, values_from = value)
+
+sum_inst <- df_data |> 
+  select(long_cite, short_cite, assessment_procedure) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = assessment_procedure, values_from = value)
+
+sum_units <- df_data |> 
+  select(long_cite, short_cite, vocab_units) |> 
+  distinct() |> 
+  mutate(value = 1) |> 
+  pivot_wider(names_from = vocab_units, values_from = value)
+
+sum_contr <- df_contrasts |> 
+  mutate(between = arm_ref == 1L) |> 
+  select(short_cite, between) |> 
+  group_by(short_cite) |> 
+  summarise(between = max(between)) |> 
+  count(between)
+```
+
+See Appendix XX in Supplementary Material for the PRISMA flow diagram detailing search results and records excluded for various reasons. Among 3747 screened research articles, a total of `r df_data$long_cite |> n_distinct()` met our selection criteria and were included (see Table XX), accounting for `r nrow(df_data)` vocabulary size observations organised into `r nrow(df_contrasts)` pairwise contrasts.
+
+Sample sizes were heterogeneous across studies, ranging from `r sum_n$N |> min()` to `r sum_n$N |> max()` children ($M$ = `r sum_n$N |> mean()`, $Mdn$ = `r sum_n$N |> median()`) and with a total of `r sum_n$N |> sum() |> format(big.interval = 3, big.mark = ",")` children represented in the current work. We found `r sum_n |> filter(N >= 50) |> nrow()` studies including at least 50 participants, and `r sum_n |> filter(N >= 100) |> nrow()` including at least 100 participants. Participants were recruited from early childhood to high school, with mean age ranging from `r sum_age$age_mean |> min()` to `r sum_age$age_mean |> max()` months ($M$ = `r sum_age$age_mean |> mean()`, $Mdn$ = `r sum_age$age_mean |> median()`). `r sum_typical$all_typical |> sum()` studies included only children with typical language development and `r sum_typical$typ_atyp |> sum() + sum_typical$all_atypical |> sum()` reported data on at least some children with atypical development. 
+
+```{r}
+#| label: "fig-descr-lang"
+#| fig.width: 8
+#| fig.height: 4.5
+#| fig.cap: "Number of studies including participants from each language represented in our meta-analysis, showing notable right skewing. Languages are indicated by their ISO code. \"Various\" indicates studies that included bilingual participants who spoke one focal language and another unspecified or varying language, rather than bilinguals of a particular language pair."
+
+descriptives_lang |> 
+  ggplot(aes(x = all_lang, y = n, fill = family_collapsed)) +
+  geom_col() +
+  labs(x = "Language", y = "Number of studies", fill = "Language family") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "inside",
+        legend.position.inside = c(.88, .67))
+```
+
+@fig-descr-lang shows the linguistic backgrounds of participants in included studies, showing notable right skewing, with English, Spanish, and French being the most well-studied. This observation reflects the unequal distribution of languages studied in developmental psychology (CITE singhDiversityRepresentationInfant2023), highlighting the importance of diversifying language acquisition research. The skewed distribution persists when considering language pairs studied: the most frequent language pairs were English–Spanish (`r print_lp("eng/spa")` studies), English–various (`r print_lp("eng/various")`), English–French (`r print_lp("eng/fra")`), and English–Mandarin (`r print_lp("cmn/eng")`). All other language pairs were attested in fewer than 10 studies, and indeed `r descriptives_lang_pairs |> filter(n == 1) |> nrow()` of all `r nrow(descriptives_lang_pairs)` language pairs were only present in a single study. `r sum_contr |> filter(between == 1) |> pull(n)` studies included both monolingual and bilingual samples, while `r sum_contr |> filter(between == 0) |> pull(n)` studies included only bilingual samples. Additionally, `r sum_plur |> filter(is_plurilingual == "yes") |> pull(n)` studies included multilingual children learning more than two languages, and a further `r sum_plur |> filter(is_plurilingual == "mixed") |> pull(n)` included mixed bilingual/multilingual samples. It is worth noting that `r sum_plur |> filter(is.na(is_plurilingual)) |> pull(n)` of our `r df_data$long_cite |> n_distinct()` studies did not report sufficient information for us to determine whether any participants were multilingual, and we recommend more detailed reporting of participants' linguistic backgrounds to better aid results interpretation.
+
+Concerning vocabulary assessment, included studies measured expressive ($N$ = `r sum_domain$receptive |> is.na() |> sum()`), receptive ($N$ = `r sum_domain$expressive |> is.na() |> sum()`), or both ($N$ = `r sum(sum_domain$receptive & sum_domain$expressive, na.rm = T)`) language domains. To measure bilingual vocabulary, studies used a combination of total ($N$ = `r sum_measure$total |> sum(na.rm = T)`), conceptual ($N$ = `r sum_measure$conceptual |> sum(na.rm = T)`), and single-language ($N$ = `r sum_measure$"language-specific" |> sum(na.rm = T)`) measures, relying on direct ($N$ = `r sum_inst$direct |> sum(na.rm = T)`) or indirect ($N$ = `r sum_inst$indirect |> sum(na.rm = T)`) assessment tool type. Finally, studies reported effect sizes using raw scores ($N$ = `r sum_units$rawscore |> sum(na.rm = T)`), standardized scores ($N$ = `r sum_units$'standard score' |> sum(na.rm = T)`), proportions ($N$ = `r sum_units$proportion |> sum(na.rm = T)`), or percentiles ($N$ = `r sum_units$percentile |> sum(na.rm = T)`).
+
+## Network meta-regression
+
+```{r heterogeneity}
+tau <- as.matrix(mod_full$draws("tau", format = "draws_matrix"))
+s2 <- df_contrasts |>
+  filter(arm_ref == 1) |>
+  group_by(k = arm_trt - 1) |>
+  summarise(s2 = median(se_y^2), .groups = "drop")
+
+hdi95 <- function(x) {
+  x <- sort(as.numeric(x))
+  n <- length(x)
+  k <- max(1L, floor(0.95 * n))
+  w <- x[k:n] - x[seq_len(n - k + 1)]
+  i <- which.min(w)
+  c(x[i], x[i + k - 1])
+}
+
+i2 <- map(1:3, \(k) {
+  s2k <- s2$s2[s2$k == k]
+  i2_draws <- tau[, k]^2 / (tau[, k]^2 + s2k)
+  h <- hdi95(i2_draws)
+  tibble(
+    variable = comp_lab[as.character(k)],
+    median = median(i2_draws),
+    q2.5 = h[1],
+    q97.5 = h[2]
+  )
+}) |> list_rbind() |> 
+  mutate(model = "full")
+```
+
+```{r}
+#| label: "fig-network"
+#| fig.width: 3
+#| fig.height: 3
+#| fig.cap: "Network plot showing meta-analytic effect sizes for all pairs of nodes. Edge thickness indicates effect size. Colour reflects the three monolingual–bilingual comparisons of interest. Solid edges indicate credible effect sizes; dashed edges indicate effect sizes whose 95% CrI overlapped with zero. Mono: monolingual; Bi-SL: bilingual – single-language; Bi-CV: bilingual – conceptual vocabulary; Bi-TV: bilingual – total vocabulary."
+
+plot_network(mod_full)
+```
+
+For our meta-regression, R-hat values for the model were all < `r df_res_all$rhat |> max(na.rm = T) |> ceiling_dec()`, indicating convergence. There was significant heterogeneity between studies for bilingual single-language versus monolingual comparisons ($I^2$ = `r print_res(i2, "Bi-LS")`), but less heterogeneity for bilingual total vocabulary versus monolingual comparisons ($I^2$ = `r print_res(i2, "Bi-TV")`) and for bilingual conceptual vocabulary versus monolingual comparisons ($I^2$ = `r print_res(i2, "Bi-CV")`). 
+
+@fig-network shows the network plot for the meta-analytic between-node effects. With respect to RQ1, bilingual conceptual vocabularies were not credibly different than their monolingual counterparts ($g$ = `r print_res(df_res_all, "mu_d[3]")`), while single-language vocabularies were smaller than monolingual vocabularies ($g$ = `r print_res(df_res_all, "mu_d[1]")`) and total vocabularies were larger than monolingual vocabularies ($g$ = `r print_res(df_res_all, "mu_d[2]")`).
+
+### Covariate analysis
+
+```{r}
+#| label: "fig-mod-summary"
+#| fig.width: 8
+#| fig.height: 5
+#| fig.cap: "Posterior estimates of moderator effects on the difference between bilingual and monolingual vocabularies. Dashed line indicates zero."
+
+covar_lab <- c(
+  `1` = "Age",
+  `2` = "Vocab domain\n(expressive – receptive)",
+  `4` = "Instrument type\n(direct – indirect)",
+  `3` = "Typical devt\n(typical – atypical)",
+  `5` = "ASJP dist"
+)
+
+p_beta <- df_res_all |>
+  filter(model == "full", str_starts(variable, fixed("beta["))) |>
+  mutate(
+    k = str_match(variable, "beta\\[(\\d+),(\\d+)\\]")[, 2],
+    p = str_match(variable, "beta\\[(\\d+),(\\d+)\\]")[, 3],
+    comparison = factor(k, levels = c("1", "3", "2"),
+                        labels = c("single-language", "conceptual", "total")),
+    covariate = factor(p, levels = names(covar_lab), labels = unname(covar_lab)) |> 
+      fct_rev(),
+    credible = if_else(sign(q2.5) == sign(q97.5), "credible", "not credible")
+  ) |>
+  ggplot(aes(x = mean, y = covariate, col = comparison, group = comparison)) +
+  geom_vline(xintercept = 0, lty = "dashed") +
+  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), width = 0,
+                position = position_dodge(.5, reverse = TRUE)) +
+  geom_point(aes(shape = credible), 
+             position = position_dodge(.5, reverse = TRUE)) +
+  scale_shape_manual(values = c(16, 1)) +
+  scale_colour_discrete(palette = bivoc_scale) +
+  theme(legend.position = "bottom",
+        legend.box = "vertical",
+        legend.spacing = unit(0, "pt")) +
+  labs(x = "Posterior estimate", y = "", col = "Vocab measure",
+       shape = "Credibility")
+
+p_beta
+```
+
+With respect to RQ2--6, @fig-mod-summary shows an overview of the posterior estimates for each moderator in the meta-regression across all bilingual vocabulary measures. _Age_ showed a positive effect for total and single-language bilingual vocabularies but not conceptual vocabularies; in other words, the difference between bilingual total vocabularies and monolingual vocabularies was greater for older children, and the difference between bilingual single-language vocabularies and monolingual vocabularies was less negative for older children, as shown in [@fig-mods]A. 
+
+_Vocabulary domain_ showed a consistent negative effect for all bilingual vocabulary measures, such that the difference between bilingual and monolingual vocabularies was more negative for expressive vocabularies than receptive vocabularies, as shown in [@fig-mods]B.
+
+_Instrument type_ showed a negative effect for single-language and conceptual vocabularies, such that the difference between bilingual and monolingual vocabularies was more negative for direct tools than indirect tools, as shown in [@fig-mods]C.
+
+_Development typicality_ did not demonstrate any reliable effects, as shown in [@fig-mods]D. However, it should be noted that there were relatively few effect sizes from atypical samples, and there were no effect sizes from direct contrasts between monolingual vocabularies and either conceptual or total vocabularies.
+
+_Language distance_, operationalised using ASJP distance, also did not demonstrate any reliable effects, as shown in [@fig-mods]E. Again, we note that the limited variability in ASJP distance among observed language pairs (due in part to the highly skewed distribution over language pairs of the included studies) may have limited our ability to reliably detect any possible effects of language distance.
+
+```{r}
+#| label: "fig-mods"
+#| fig.width: 8
+#| fig.height: 9
+#| out.width: 570
+#| fig.cap: "Effect sizes for bilingual vocabularies compared against monolingual vocabularies, by (A) mean sample age in years, (B) vocabulary domain, (C) whether children are typically developing, (D) assessment type, and (E) language distance in terms of ASJP distance. Grey histograms indicate within-bilingual comparisons that could not be visualised in the main plots, but which were also included in the network meta-regression. Dashed line indicates zero."
+
+p_age <- plot_moderator(mod_full, "age_c", "Age (years)", "A")
+p_domain <- plot_moderator(mod_full, "vocab_type", "Vocab domain", "B")
+p_typical <- plot_moderator(mod_full, "infant_typical", "Typical devt", "C")
+p_assess <- plot_moderator(mod_full, "assessment_procedure", "Instrument type", "D")
+p_asjp <- plot_moderator(mod_full, "asjp_dist", "ASJP distance", "E")
+
+p_mods <- ((p_age | p_domain) /
+             (p_typical | p_assess) /
+             ((plot_spacer() | p_asjp | plot_spacer()) +
+                plot_layout(widths = c(1, 2, 1)))) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+p_mods
+```
+
+```{r}
+#| label: "fig-net-mods"
+#| fig.width: 6
+#| fig.height: 9
+#| out.width: 415
+#| fig.cap: "Network plots showing meta-analytic effect sizes for all pairs of nodes, divided by (A) mean sample age or (B) vocabulary domain and instrument type. Edge thickness indicates effect size. Colour reflects the three monolingual–bilingual comparisons of interest. Solid edges indicate credible effect sizes; dashed edges indicate effect sizes whose 95% CrI overlapped with zero. Mono: monolingual; Bi-SL: bilingual – single-language; Bi-CV: bilingual – conceptual vocabulary; Bi-TV: bilingual – total vocabulary."
+
+p_young <- plot_network(mod_full, list(age_years = 2), "2 years old")
+p_mid <- plot_network(mod_full, list(age_years = 5), "5 years old")
+
+p_exp_dir <- plot_network(mod_full, 
+                          list(vocab_type = "expressive",
+                               assessment_procedure = "direct"),
+                          "Expressive | direct")
+p_exp_ind <- plot_network(mod_full, 
+                          list(vocab_type = "expressive",
+                               assessment_procedure = "indirect"),
+                          "Expressive | indirect")
+p_rec_dir <- plot_network(mod_full, 
+                          list(vocab_type = "receptive",
+                               assessment_procedure = "direct"),
+                          "Receptive | direct")
+p_rec_ind <- plot_network(mod_full, 
+                          list(vocab_type = "expressive",
+                               assessment_procedure = "indirect"),
+                          "Receptive | indirect")
+
+p_nets <- ((p_young + labs(tag = "A") | p_mid)/
+             (p_exp_dir + labs(tag = "B") | p_exp_ind) /
+             (p_rec_dir | p_rec_ind)) &
+  theme(plot.margin = margin(10, 10, 10, 10))
+p_nets
+```
+
+### Networks at representative covariate values
+
+To better understand the contributions of the three moderators with reliable effects (age, vocabulary domain, and instrument type), we constructed network plots at representative values of those covariates, holding the others at the grand mean.
+
+First, we looked at the effect of age, shown in [@fig-net-mods]A. Observing the distribution over ages in the set of included studies revealed notable densities around 1–3 years of age and around 4–6 years of age; thus, we selected representative ages at the midpoints of those two ranges. At 2 years, bilingual conceptual and total vocabularies appeared to be indistinguishable from each other, and also from monolingual comparisons; however, by 5 years, only bilingual conceptual vocabularies were not reliably different than monolingual vocabularies, as total vocabularies reliably exceeded both conceptual and monolingual vocabularies. We also note that data beyond 6 years of age were very sparse for conceptual and total vocabularies, highlighting an underexplored area of research in bilingualism across development.
+
+Next, we looked at the joint effects of vocabulary domain and instrument type, shown in [@fig-net-mods]B. These networks revealed an asymmetric effect of vocabulary domain. For indirect vocabulary measurements (e.g., parent-reported vocabulary checklists), bilingual total and conceptual vocabularies as well as monolingual vocabularies were not reliably different from one another. However, for direct vocabulary measurements (e.g., in-lab picture vocabulary tasks), bilingual total vocabularies were the closest to monolingual comparisons for expressive vocabularies, whereas bilingual conceptual vocabularies were the closest to monolingual comparisons for receptive vocabularies. 
+
+# Discussion
+
+## Limitations and Future Directions
+
+We acknowledge different limitations related to the evidence of the current work.
+
+First, we highlighted the heterogeneity of the included studies related to the population (e.g., languages spoken by children, participants' age), the assessment (between analyses across monolinguals and bilinguals, within analysis on bilingual children), and the outcome (e.g., language domains, assessment procedures, vocabulary measure, raw or standardized scores). Nonetheless, although the current work recognizes heterogeneity is the keyword entailed in plurilingual samples, evidence from this secondary study aims to shed light on the optimal way to measure bilingual vocabulary compared to monolinguals across different populations and contexts. Furthermore, the inclusion of the study of moderators potentially affecting the definition of the optimal plurilingual measure should strengthen the relevance of the current evidence in both experimental and clinical settings.
+
+Also, the quantitative integration of the current secondary study relies on data from preliminary studies including both raw and standardized data and this may have an impact on the results of the current meta-analyses. We included both effect sizes and we preferred including raw data when both were available since they were the most commonly used score. However, we carried out sensitivity analyses removing separately raw and standardized data and we found no differences on the main effect. 
+
+
+## Conclusion
+
+The current work focused on the definition of the optimal way to measure bilingual vocabulary when bilingual normative data is not available. We found that [...].
+Waiting for evidence in favor of bilingual normative data on subgroups of bilingual populations (e.g., bilingual Mandarin-Italian children living in Italy), the current evidence may support the study and understanding of bilingual language development in both experimental and clinical settings.
+
+# References
+
+<!-- References will auto-populate in the refs div below -->
+
+::: {#refs}
+:::
+
+# Network meta-analysis model formulation {#apx-model}
+We fitted a Bayesian network meta-analysis with four nodes: monolingual vocabulary (Mono), bilingual single-language vocabulary (Bi-SL), bilingual total vocabulary (Bi-TV), and bilingual conceptual vocabulary (Bi-CV). Mono was used as the network reference, and effects were represented as contrasts between nodes, operationalised as standardised mean differences calculated as Hedges' $g$. We term the set of bilingual nodes $Bi = \{\text{Bi-SL, Bi-TV, Bi-CV}\}$.
+
+The expected value of a single contrast i is:
+$$\theta_i = A_{a_i^{(T)}, j_i, c_i^{(T)}} - A_{a_i^{(R)}, j_i, c_i^{(R)}} + \mathbf{x}_i^\top ( \boldsymbol{\beta}_{a_i^{(T)}} - \boldsymbol{\beta}_{a_i^{(R)}})$$
+where $A_{a_i, j_i, c_i}$ is the latent node-level effect for node $a$, study $j$, and participant cohort $c$, and $\boldsymbol{\beta}_a$ represents the meta-regression coefficients for covariates $\mathbf{x}_i$. 
+$T$ represents the "treatment" node and $R$ represents the "reference" node; typically, the reference node is the monolingual node where available, but if only within-bilingual comparisons were included in a study, then the treatment and reference nodes are two different bilingual vocabulary measurements.
+
+The latent node-level effect is defined as:
+$$A_{a,j,c} = d_a + \delta_{j,a} + u_{c,a} + v_c$$
+where $d_a$ is the population-average basic node-level effect, $\delta_{j,a}$ is the study-specific deviation, $u_{c,a}$ is the bilingual group-specific cohort deviation, and $v_c$ is the scalar cohort effect. 
+
+$d_a$, $\delta_{j,a}$, and $u_{c,a}$ are defined relative to the monolingual reference node; thus, they are equal to zero when $a =$ Mono, and are equal to a relative bilingual minus monolingual effect for $a \in Bi$. 
+
+The prior for $d_a$ is as follows: 
+$$d_a \sim \mathcal{N}(0, 1^2),\enspace a \in Bi$$
+
+The $\delta_{j,a}$ is distributed as follows:
+$$\delta_{j,a} \sim \mathcal{N}(0, \tau_a^2)$$
+where $\tau_a$ represents the standard deviation of between-study heterogeneity, with prior
+$$\tau_a \sim \mathcal{N}^+ (0, 0.3^2),\enspace a \in Bi$$
+We note that study-level deviations are assumed to be mutually independent across the bilingual nodes because sampling covariances were unavailable and challenging to estimate.
+
+For correlated bilingual cohort deviations, let 
+$$\mathbf{u}_c = \begin{pmatrix} u_{c,\, \text{Bi-SL}} \\ u_{c,\, \text{Bi-TV}} \\ u_{c,\, \text{Bi-CV}} \end{pmatrix}$$
+denote the vector of bilingual group-specific deviations for cohort $c$. 
+Then, $\mathbf{u}_c$ is distributed as follows:
+$$\mathbf{u}_c \sim \mathrm{MVN}_3(\mathbf{0}, \mathbf{D}_\sigma \mathbf{\Omega} \mathbf{D}_\sigma)$$
+where $\mathbf{D}_\sigma$ is a diagonal matrix with entries $\sigma_a$, denoting the within-cohort standard deviation for bilingual node $a$, and $\Omega$ is the $3 \times 3$ correlation matrix of bilingual cohort deviations.
+The priors are:
+$$\sigma_a \sim \mathcal{N}^+(0, 0.3^2),\enspace a \in Bi$$
+$$\Omega \sim \mathrm{LKJ}(2)$$
+
+For the meta-regression effects, let
+$$\boldsymbol{\beta}_a = \begin{pmatrix} \beta_{a,1} \\ \vdots  \\ \beta_{a,P} \end{pmatrix}$$
+be the $P$-dimensional vector of meta-regression coefficients for node $a$.
+The monolingual node is the reference, such that $\boldsymbol{\beta}_\mathrm{Mono} = \mathbf{0}$.
+For the bilingual nodes, the priors are:
+$$\beta_{a,q} \sim \mathcal{N}(0, 0.5^2),\enspace a \in Bi,\enspace q = 1, \dots, P$$.
+
