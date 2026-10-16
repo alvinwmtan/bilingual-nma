@@ -12,10 +12,46 @@ df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
 ```
 
 # Construction
+Binary covariates are coded (−0.5, +0.5); ASJP is centred on the estimation sample. Then \(\mu_d\) is a grand-mean effect, comparable to the base model.
+
 ```{r}
+raw_vars <- c(
+  age_c     = "age_c",
+  vocab_c   = "vocab_type",
+  typical_c = "infant_typical",
+  proc_c    = "assessment_procedure",
+  asjp_c    = "asjp_dist"
+)
+
+add_coded <- function(df) {
+  df |>
+    mutate(
+      vocab_c   = if_else(vocab_type == "expressive", 0.5, -0.5),
+      typical_c = if_else(infant_typical, 0.5, -0.5),
+      proc_c    = if_else(assessment_procedure == "direct", 0.5, -0.5),
+      asjp_c    = asjp_dist - mean(asjp_dist, na.rm = TRUE)
+    )
+}
+
 build_stan_data <- function(df_contrasts, formula = ~ 1) {
-  
-  # ~ 1 gives an intercept-only matrix; drop it to get 0 columns
+  covars <- all.vars(formula)
+  raw_needed <- unique(map_chr(covars, \(v) if (v %in% names(raw_vars)) raw_vars[[v]] else v))
+  if (length(raw_needed) > 0) {
+    df_contrasts <- df_contrasts |> drop_na(all_of(raw_needed))
+    df_contrasts <- add_coded(df_contrasts)
+    key_all <- sort(unique(c(
+      paste(df_contrasts$short_cite, df_contrasts$ppt_trt),
+      paste(df_contrasts$short_cite, df_contrasts$ppt_ref)
+    )))
+    df_contrasts <- df_contrasts |>
+      mutate(
+        study_id   = as.integer(factor(short_cite)),
+        ppt_trt_id = match(paste(short_cite, ppt_trt), key_all),
+        ppt_ref_id = match(paste(short_cite, ppt_ref), key_all),
+        paired     = as.integer(ppt_trt_id == ppt_ref_id)
+      )
+  }
+
   X <- model.matrix(formula, data = df_contrasts)
   X <- X[, setdiff(colnames(X), "(Intercept)"), drop = FALSE]
   
@@ -53,13 +89,18 @@ mod <- cmdstan_model("nma_bilingual.stan")
 ```{r}
 model_specs <- list(
   base                  = ~ 1,
-  age                   = ~ age_c,
-  vocab_type            = ~ vocab_type,
-  infant_typical        = ~ infant_typical,
-  assessment_procedure  = ~ assessment_procedure
+  # age                   = ~ age_c,
+  # vocab_type            = ~ vocab_c,
+  # infant_typical        = ~ typical_c,
+  # assessment_procedure  = ~ proc_c,
+  # asjp_dist             = ~ asjp_c,
+  full                  = ~ age_c + vocab_c + typical_c + proc_c + asjp_c
 )
 
-fit_one <- function(spec_formula) {
+fit_dir <- here("outputs", "stan")
+dir.create(fit_dir, recursive = TRUE, showWarnings = FALSE)
+
+fit_one <- function(spec_formula, name) {
   stan_data <- build_stan_data(df_contrasts, spec_formula)
   mod$sample(
     data            = stan_data,
@@ -68,11 +109,13 @@ fit_one <- function(spec_formula) {
     parallel_chains = 4,
     iter_warmup     = 1000,
     iter_sampling   = 2000,
-    adapt_delta     = 0.95
+    adapt_delta     = 0.95,
+    output_dir      = fit_dir,
+    output_basename = name
   )
 }
 
-fits <- map(model_specs, fit_one)
+fits <- imap(model_specs, fit_one)
 saveRDS(fits, here("outputs", "fits.rds"))
 ```
 

@@ -16,14 +16,34 @@ df_data_a <- read_sheet(ss, "Alvin")
 df_data_g <- read_sheet(ss, "Gianmatteo")
 df_data_f <- read_sheet(ss, "Federica")
 df_main <- read_sheet(ss, "main")
+df_paired_wide <- read_sheet(ss, "paired")
+
+as_chr1 <- function(x) {
+  if (!is.list(x)) return(as.character(x))
+  map_chr(x, \(y) {
+    if (is.null(y) || length(y) == 0) return(NA_character_)
+    y1 <- y[[1]]
+    if (is.null(y1) || is.na(y1)) NA_character_ else as.character(y1)
+  })
+}
+
+as_num1 <- function(x) {
+  v <- as_chr1(x) |>
+    str_remove(" \\(.*\\)") |>
+    str_trim()
+  v[str_to_lower(v) %in% c("na", "/", "not available")] <- NA_character_
+  out <- rep(NA_real_, length(v))
+  ok <- !is.na(v) & str_detect(v, "^-?[0-9]+([.][0-9]+)?$")
+  out[ok] <- as.numeric(v[ok])
+  out
+}
 
 clean_df <- function(df_dat) {
   df_dat |> 
+    mutate(across(c(has_full_text, compare_group), as_chr1)) |>
     filter_out(str_detect(has_full_text, "exclude"),
                str_detect(compare_group, "exclude")) |> 
-    mutate(across(where(is.list), 
-                  \(x) map_dbl(x, \(y) ifelse(is.null(y) || is.na(y), NA, 
-                                              y |> str_remove(" \\(.*\\)") |> as.numeric()))),
+    mutate(across(where(is.list), as_num1),
            notes = coalesce(notes, `...35`),
            across(where(is.character), \(x) na_if(x, "/"))) |> 
     select(-`...35`)
@@ -53,11 +73,20 @@ df_data_f <- bind_rows(
 
 df_data_raw <- bind_rows(
   df_data_a |>
-    filter(is.na(exclusion_reason)),
+    filter(is.na(exclusion_reason)) |>
+    mutate(compare_group = as_chr1(compare_group)),
   clean_df(df_data_g),
   clean_df(df_data_f)
 ) |> 
   select(-starts_with("clt_"))
+
+df_paired_long <- df_paired_wide |>
+  mutate(pair_id = row_number()) |>
+  pivot_longer(
+    cols = matches("_(1|2)$"),
+    names_to = c(".value", "side"),
+    names_pattern = "^(.*)_(1|2)$"
+  )
 ```
 
 # Exclusions
@@ -90,25 +119,33 @@ df_exclusions <- bind_rows(
   )) |> 
   select(long_cite, short_cite, exclusion_reason) |> 
   bind_rows(df_main |> 
-              mutate(has_full_text = str_replace_all(has_full_text, "(exclue|exlculde|excude)", "exclude")) |> 
+              mutate(has_full_text = str_replace_all(has_full_text, 
+                                                     "(exclue|exlculde|excude)", "exclude")) |> 
               filter(str_detect(str_to_lower(has_full_text), "exclude")) |> 
               select(long_cite, short_cite, exclusion_reason = has_full_text)) |> 
   distinct() |> 
   group_by(long_cite, short_cite) |> 
   summarise(exclusion_reason = str_c(exclusion_reason, collapse = " / "),
             .groups = "drop") |> 
-  mutate(exclusion_reason = exclusion_reason |> str_to_lower() |> str_remove_all("exclude(d) ?"))
+  mutate(exclusion_reason = exclusion_reason |> str_to_lower() |> 
+           str_remove_all("excluded? ? ?") |> str_remove_all(" / ma"))
 
 write_csv(df_exclusions |> select(exclusion_reason) |> distinct(), here("data", "exclusions.csv"))
 df_exclusions_cleaned <- read_csv(here("data", "exclusions_cleaned.csv"))
 df_exclusions <- df_exclusions |> 
   mutate(exclusion_reason = str_replace(exclusion_reason, " / $", " /")) |> 
   left_join(df_exclusions_cleaned, by = join_by(exclusion_reason))
+df_exclusions <- df_exclusions |>
+  filter(!long_cite %in% df_paired_wide$long_cite)
 df_exclusion_summary <- df_exclusions |> 
   group_by(exclusion_reason_cleaned) |> 
   summarise(n = n())
-df_data_raw <- df_data_raw |> 
-  filter(!(long_cite %in% df_exclusions$long_cite))
+df_data_raw <- bind_rows(
+  df_data_raw |> filter(!(long_cite %in% df_exclusions$long_cite)),
+  df_paired_long |>
+    mutate(compare_group = as_chr1(compare_group)) |>
+    select(-side, -pair_id, -t_df, -t_score, -F_df1, -F_df2, -F_score)
+)
 
 # sanity check
 df_main |> 
@@ -162,7 +199,8 @@ df_data_cleaned <- df_data_raw |>
     assessment_tool_L1 = na_if(assessment_tool_L1, "na"),
     assessment_tool_L1 = na_if(assessment_tool_L1, "Not reported"),
     assessment_tool_L2 = na_if(assessment_tool_L2, "na")) |> 
-  filter(vocab_type %in% c("receptive", "expressive"))
+  filter(vocab_type %in% c("receptive", "expressive"),
+         !is.na(compare_group))
 
 df_data_cleaned |> 
   select(infant_type, L1, L2, is_plurilingual, bilingual_type, 
@@ -189,7 +227,8 @@ df_data_std <- df_data_cleaned |>
                names_to = "variable", values_to = "value") |> 
   left_join(var_map, by = join_by(variable, value)) |> 
   select(-value) |> 
-  pivot_wider(names_from = variable, values_from = std_value)
+  pivot_wider(names_from = variable, values_from = std_value,
+              values_fn = \(x) x[1])
 ```
 
 ```{r}
@@ -204,6 +243,25 @@ df_data <- df_data_std |>
   )
 
 saveRDS(df_data, here("outputs", "df_data.rds"))
+
+df_paired <- df_paired_long |>
+  select(pair_id, side, t_df, t_score, F_df1, F_df2, F_score,
+         short_cite, compare_group, ppt_group, vocab_type, vocab_measure) |>
+  mutate(across(c(compare_group, ppt_group), as.numeric)) |>
+  inner_join(
+    df_data |> mutate(across(c(compare_group, ppt_group), as.numeric)),
+    by = join_by(short_cite, compare_group, ppt_group, vocab_type, vocab_measure)
+  ) |>
+  pivot_wider(
+    names_from = side,
+    values_from = c(ppt_group, lang_group, N, age_mean, age_sd, age_min, age_max,
+                    L1_definition, L1, L2, is_plurilingual, bilingual_type, country,
+                    assessment_tool_L1, assessment_tool_L2, vocab_score_mean, vocab_score_sd),
+    names_glue = "{.value}_{side}"
+  ) |>
+  select(-pair_id)
+
+saveRDS(df_paired, here("outputs", "df_paired.rds"))
 ```
 
 # Descriptives
@@ -289,6 +347,8 @@ sum_sum_lang <- sum_sum_lang |>
          ) |> factor(levels = c("IE: Germanic", "IE: Romance", "IE: Indo-Iranian", "IE: Other",
                                 "Semitic", "Sinitic", "Other")))
 
+write_csv(sum_sum_lang, here("outputs", "descriptives_lang.csv"))
+
 # add colour based on language family
 sum_sum_lang |> 
   ggplot(aes(x = all_lang, y = n, fill = family_collapsed)) +
@@ -318,6 +378,14 @@ sum_sum_langp <- sum_langp |>
   count(langp) |> 
   arrange(desc(n)) |> 
   mutate(langp = str_replace_all(langp, "zzz", "various"))
+
+write_csv(sum_sum_langp, here("outputs", "descriptives_lang_pairs.csv"))
+
+sum_sum_langp |> 
+  separate_wider_delim(langp, "/", names = c("lang1", "lang2")) |> 
+  select(-n) |> 
+  filter(lang2 != "various") |> 
+  write_csv("pairs_bnma.csv")
 ```
 
 ```{r}

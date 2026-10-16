@@ -1,0 +1,284 @@
+exclusion_reason,exclusion_reason_cleaned
+(not in english but in spanish),article language
+(not in english),article language
+(wrong language: german),article language
+(dll; wrong population; https://files.eric.ed.gov/fulltext/ed572867.pdf#page=51),DLL
+(dll; wrong population),DLL
+(dll),DLL
+(wrong popiulation) / (dll),DLL
+(wrong population (english american children in an arabic school program in us)),DLL
+(wrong population; dll and not even detailed the lingual status of participants),DLL
+"(wrong population; dll; ""for the purpose of the study, dlls were defined as children exposed to spanish from birth at home by a parent or another family member and to english from any point prior to enrollment in the study"")",DLL
+(wrong population; dll),DLL
+(wrong population; dll) / (wrong population: dll),DLL
+(wrong population; dll) / (wrong population:dll),DLL
+(wrong population; dual language learners),DLL
+(wrong population; eel),DLL
+(wrong population; ell),DLL
+(wrong population; ells),DLL
+(wrong population:  efl learners),DLL
+(wrong population: children whose l1 is the same of the school's language and efl),DLL
+"(wrong population: dll ,english school programs in egypt)",DLL
+(wrong population: dll in elementary schools),DLL
+"(wrong population: dll; ""all were proficient native cantonese speakers who learned chinese and english as core subjects in hong kong mainstream primary schools"")",DLL
+(wrong population: dll; 6% bilinguals mainly exposed to l2 but any further information; dual language immersion program),DLL
+(wrong population: dll; cantonese-speaking children exposed to 20min or half of school-time to english),DLL
+(wrong population: dll; children in immersion program),DLL
+(wrong population: dll; chinese children exposed to english schools in china),DLL
+(wrong population: dll; dual language immersion program),DLL
+(wrong population: dll; dutch children learning english as foreign language at school),DLL
+(wrong population: dll; exposure to english school in a non-english-speaking country),DLL
+(wrong population: dll; head start program),DLL
+"(wrong population: dll; in singapore, some bilinguals were exposed to english after 6 yo mainly in education settings)",DLL
+(wrong population: dll; mandarin immigrant children in head start programs in the south of us),DLL
+(wrong population: dll; spanish immigrant children in head start programs in the south of us),DLL
+"(wrong population: dll; spanish speaking childre either exposed to a bilingual education program or english instruction in first grade, with any further info from participants",DLL
+(wrong population: dll),DLL
+(wrong population: efl),DLL
+(wrong population: ell),DLL
+(wrong population: native cantonese-speaking children in chinese-medium schools; english was taught as an l2/foreign language only),DLL
+(wrong population),DLL
+dll,DLL
+dll; only verbal morphology considered,DLL
+dlls,DLL
+no comparison / (wrong population: participants are native l1 speakers learning an l2 as a foreign language),DLL
+no comparison / (wrong population:dll),DLL
+"no comparisons, dll",DLL
+unsure if these count as dlls,DLL
+(off-topic),irrelevant
+(full-text not found) / no comparison,no comparison
+(languages don't match),no comparison
+(no comparison),no comparison
+"(wrong outcome, language-specific comparisons across bilingual samples)",no comparison
+(wrong outcome; comparison between typical and atypical bilinguals),no comparison
+(wrong outcome: comparisons between typical and atypical bilinguals),no comparison
+(wrong outcome: conceptual scores' comparisons across bilingual samples),no comparison
+(wrong outcome: language-specific comparisons across bilingual samples),no comparison
+(wrong outcome: language-specific outcomes of a bilingual sample),no comparison
+(wrong outcome: language-specific score in a bilingual sample),no comparison
+(wrong outcome: vocabulary scores' comparisons across bilingual samples),no comparison
+(wrong publication type; no experimental data),no comparison
+"(wrong study design; just english-specifc score of a group of bilinguals, with any comparison)",no comparison
+all children were bilingual,no comparison
+no between-vocab-measure or mono-vs-bi comparison,no comparison
+no comparison,no comparison
+no comparison / (wrong outcome: language-specific comparisons across bilingual samples),no comparison
+no comparison / (wrong outcome: reporting expressive and receptive language-specific scores),no comparison
+"no comparison, no raw data",no comparison
+no comparisons,no comparison
+no comparisons (although it has raw data),no comparison
+no comparisons (but has l1 and l2 data),no comparison
+only chinese bilingual vocab reported,no comparison
+only english bilingual vocab (2 bi groups) reported,no comparison
+only english bilingual vocab reported,no comparison
+the age difference is so big here that the groups may not be comparable,no comparison
+(full-text not available; also requested to authors),no full text
+(full-text not available; just a ppt presentation from this thesis),no full text
+(full-text not available;),no full text
+(full-text not available),no full text
+(full-text not found),no full text
+(full-text not reported),no full text
+(no full-text available),no full text
+(not found),no full text
+record not found / (no full-text available),no full text
+"(full-text not available) / ""; no original data (""""data were obtained from wordbank, an open repository for researchers to share vocabulary data (frank et al., 2016). the dataset consists of some repeated measures per child thus we will refer to our sample as the number of administrations. our data consisted of 175 spanish-english bilinguals, 289 spanish monolinguals and 126 english monolinguals, ages 18- 33 months (see table 1 below for descriptive statistics)"""")""",no original data
+(bilingual status/language exposure not adequately specified; results reported as medians and interquartile ranges (no extractable mean/sd),no/missing data
+(missind sds of expressive vocabulary),no/missing data
+(missing age and reported raw single scores from single participants; n=5),no/missing data
+(missing data; missing exact ns for each obs),no/missing data
+(missing data; missing means and sds),no/missing data
+(missing data; missing means),no/missing data
+(missing data; missing sds),no/missing data
+(missing data: mean and sd),no/missing data
+(missing data: means and sds),no/missing data
+(missing data: sd and specific chronological age),no/missing data
+(missing data),no/missing data
+(missing means and sds of expressive  and receptive vocabulary),no/missing data
+(missing means and sds of expressive vocabulary),no/missing data
+(missing means and sds of vocabulary even though it is a case series on 4 children reporting their raw scores),no/missing data
+(missing means and sds of vocabulary size),no/missing data
+(missing means and sds of vocabulary),no/missing data
+(missing means and sds),no/missing data
+(missing means of vocabulary size),no/missing data
+(missing sample size),no/missing data
+(missing sd data),no/missing data
+(missing sds and means),no/missing data
+(missing sds and n),no/missing data
+(missing sds of each time assessment of expressive vocabulary),no/missing data
+(missing sds of vocabulary size),no/missing data
+(missing sds of vocabulary),no/missing data
+"(missing sds; really interesting: misisng info on the test if receptive or expressive, if direct or indirect - ideally direct - )",no/missing data
+(missing sds),no/missing data
+(no variances),no/missing data
+(wrong outcome; data reported for means and sds for age ranges but don't know the respective children's age compated to the age range),no/missing data
+(wrong outcome; missing descriptive statistics for the reported outcomes),no/missing data
+(wrong outcome; missing means and sds for expressive vocabulary score),no/missing data
+(wrong outcome; missing sds),no/missing data
+(wrong outcome; no means and sd),no/missing data
+(wrong study design; case series with no means and sds),no/missing data
+(wrong study design: missing vocab_type and assessment_tool),no/missing data
+(wrong study design: outcome is a composed raw composite score of both expressive and receptive vocabulary. this record will just raise heteroegeneity and noise of our study),no/missing data
+insufficient data reported,no/missing data
+insufficient data to extract vocab estimates,no/missing data
+"insufficient info (have ns and means, but no age)",no/missing data
+means and sds not given; maybe email author for raw data? (link doesn't work),no/missing data
+means and sds not reported,no/missing data
+means and sds not reported (possible to extract from plot but small cis make it hard to read),no/missing data
+missing means and sds,no/missing data
+no data / (wrong outcome),no/missing data
+no direct vocabulary sizes reported,no/missing data
+no means and sds reported,no/missing data
+no raw data,no/missing data
+"no raw data, only regressions",no/missing data
+"no raw data, only sems",no/missing data
+no sds,no/missing data
+no sds (although pairwise comparisons are given),no/missing data
+no sds (means obtainable from plot),no/missing data
+no variances,no/missing data
+only difference score reported,no/missing data
+raw results not reported,no/missing data
+separated data not reported,no/missing data
+unclear which language results are reported,no/missing data
+values not reported,no/missing data
+vocab scores not reported,no/missing data
+(duplicate of  legacy et al.2016) / (duplicate),repeated data
+"(duplicate of ""boerma, t., leseman, p., wijnen, f., & blom, e. (2017). language proficiency and sustained attention in monolingual and bilingual children with and without language impairment. frontiers in psychology, 8. https://doi.org/10.3389/fpsyg.2017.01241"")",repeated data
+(duplicate of kalia 2007),repeated data
+(duplicate of lsemane & van tuijl),repeated data
+(duplicate of paradis & jia (2016)),repeated data
+(duplicate of peets & bialystok (2013)),repeated data
+(duplicate of swanson et al. (2019)),repeated data
+(duplicate of the next one),repeated data
+"(duplicate; dupliate of previous study i.e. rolla san francisco, carlo et al. (2006))",repeated data
+(duplicate; no original data: authors retrieved data from mancilla-martinez et al. 2011; so the same sample is reported twice) / ,repeated data
+(duplicate),repeated data
+(duplicate) hao et al. 2018,repeated data
+"(same data as vermeer 2004 (duplicate study, not extracted separately))",repeated data
+"(same data of messer et al. 2010; ""the current bilingual children present an interesting case as they were cultural minority children from turkish immigrant families in the netherlands who had been predominantly exposed to turkish at home prior to the start of the study, but had enrolled in dutch kindergarten shortly before the first wave of assessment. previous studies on this population (appel & vermeer, 1998; droop & verhoeven, 2003) as well as studies on the same sample (blom, kuntay, messer, verhagen, & leseman, 2014; messer et al., 2010) "")",repeated data
+"(same data of o'toole et al., 2017, well a subset of a large dataset; ""the data for these children were selected from bigger datasets based on 97 bilingual and 145 monolingual children. the sample used in this study is smaller than the one included in the o’toole et al. analysis (2017) since here, only children whose parents were both native speakers of polish were included to avoid group heterogeneity."")",repeated data
+"(same design than parsons, c. e., & lyddy, f. (2009))",repeated data
+data are the same as other papers from deanda; published papers chosen in favour of thesis,repeated data
+declined in favour of kehoe & havy (2019) and kehoe & girardier (2020),repeated data
+due to potential sample overlap with the previous one included study from the same longitudinal dataset (singapore kindergarten impact project),repeated data
+likely same data as previous,repeated data
+likely same data as the below,repeated data
+same data as above,repeated data
+same data as calvo & bialystok (2014),repeated data
+same data as conboy & thal (2006),repeated data
+same data as hoff et al. (2012),repeated data
+same data as hoff et al. (2014),repeated data
+same data as messer et al. (2010),repeated data
+same data as thordardottir (2017),repeated data
+subset of data in blom et al. (2017),repeated data
+subset of data in boerma et al. (2017),repeated data
+subset of data in bosma et al. (2017),repeated data
+suspected data incorporated elsewhere,repeated data
+(retracted),retracted
+(wrong study design; editorial and no experimental data),review
+(wrong study design; editorial with no data),review
+(wrong study design; no experimental data),review
+review article,review
+(missing vocabulary size; they reported a raw number of vocabulary size (word count) 24337 (13788),wrong outcome
+(they adminsitered a spanish version of the english ppvt with the back translation method for mexican spanish bilinguals. they then compare bilinguals' results in the spanish version with the normative data of the original english data),wrong outcome
+(wrong drug; exprssive vocabulary quantified with lena),wrong outcome
+(wrong drug; no exprssive vocabulary but word definition),wrong outcome
+(wrong outcome; data not reported by specific language or instrument),wrong outcome
+(wrong outcome; detailed data but unclear l1 and l2),wrong outcome
+(wrong outcome; lexcical measure extracted by lena is not vocabulary size),wrong outcome
+(wrong outcome; lexcical measure is not vocabulary size),wrong outcome
+(wrong outcome; lexical knowledge),wrong outcome
+(wrong outcome; manipulation of ppvt administration),wrong outcome
+(wrong outcome; missing expressive vocabulary assessment),wrong outcome
+(wrong outcome; missing expressive vocabulary results),wrong outcome
+(wrong outcome; missing in which language children are dominant and non-dominant and thus in which language data rely on),wrong outcome
+(wrong outcome; no expressive vocabulary size),wrong outcome
+(wrong outcome; no vocabulary size measure),wrong outcome
+"(wrong outcome; no vocabulary size test and children differ for receiving reading clasess in irish or english ""in the absence of suitable standardised instruments, a measure of receptive vocabulary was obtained for each child. the child had to choose one of four pictures (full-colour simple line drawings) presented on a computer screen for each spoken word presented. thirty english words were selected using the online mrc psycholinguistic database age of acquisition ratings (gilhooly and logie 1980). this age of acquisition rating ranges from 100 for ages up to two years, to seven for age 13 years or more with intervening bands spanning two years. the test items used here ranged from 197 to 528, with a mean of 324 (sd88.28), and were selected so as to be appropriate for the age groups tested (six, eight and 10-year olds). the frequency of the words employed ranged from four to 214 occurrences per million, with a mean of 53.67 (sd57.8), using the kucera and francis (1967) frequencies for written words.""",wrong outcome
+(wrong outcome; no vocabulary size),wrong outcome
+(wrong outcome; not clear if receptive or expressive vocabulary; unclear tool and procedures),wrong outcome
+(wrong outcome; not vocabulary but lexical variable extracted by narrative data),wrong outcome
+(wrong outcome; vocabulary size not reported),wrong outcome
+(wrong outcome: breadth of lexical knowledge assessed as merged receptive+expressive),wrong outcome
+(wrong outcome: combined expressive-receptive vocabulary scores),wrong outcome
+(wrong outcome: composite vocabulary score as receptive+expressive),wrong outcome
+(wrong outcome: lexical depth),wrong outcome
+(wrong outcome: lexical-semantic ability),wrong outcome
+(wrong outcome: maternal education as a moderator),wrong outcome
+(wrong outcome: no standardized vocabulary measure; only language use data reported),wrong outcome
+(wrong outcome: no vocabulary size (breadth) but word definition (depth)),wrong outcome
+(wrong outcome: not only vocabulary size),wrong outcome
+(wrong outcome: picture vocabulary not reported as a standalone measure; only composite scores across subtests were available),wrong outcome
+(wrong outcome: receptive+expressive),wrong outcome
+(wrong outcome: semantic priming task like a receptive task but with any normative data; really experimental),wrong outcome
+(wrong outcome: vocabulary depth not breadth),wrong outcome
+(wrong outcome: vocabulary depth),wrong outcome
+(wrong outcome: vocabulary not measured independently; composite language score including word and sentence comprehension/production),wrong outcome
+"(wrong outcome: vocabulary size assessed as a composite score of receptive, expressive and word definition tasks (vocabulary depth))",wrong outcome
+"(wrong outcome: vocabulary size is a composite score of receptive, expressive vocabulary and vocabulary definition (depth)",wrong outcome
+(wrong outcome:no vocabulary size),wrong outcome
+(wrong outcome),wrong outcome
+(wrong outcome) / (wrong outcome),wrong outcome
+"(wrong study design; vocabulary knowledge is the reported measure and it is not clear what is it, i.e. if include bothh l1 nad l2 data)",wrong outcome
+no data / (wrong outcome: vocabulary measured as a composite score of depth and breadth),wrong outcome
+no vocab measure,wrong outcome
+no vocabulary score,wrong outcome
+"they had expressive wj-iii-cog scores, but this is synonym/antonym generation rather than true vocab",wrong outcome
+used information subtest (more a test of general knowledge),wrong outcome
+"(wrong research design; differen children across assessments: "" at time 1, 62 participants were tested (mage = 67 months, sd = 7), 23 of whom were bilingual turkish–dutch and 39 bilingual tarifit–dutch. at time 2 and time 3, seven additional turkish–dutch bilingual children were tested to achieve nearly equal numbers of turkish–dutch and tarifit–dutch participants, leading to 69 participants at time 2 (mage = 78 months, sd = 8) and time 3 (mage = 90 months, sd = 8), 30 of whom were bilingual turkish–dutch and 39 bilingual tarifit–dutch.""",wrong study design
+"(wrong study design - not clear which participants filled the test in which language, as well as langauges other than english not clear how they were assessed)",wrong study design
+"(wrong study design: selection bias: ""(2) children with a valid spanish receptive vocabulary score in either the fall or spring, "")",wrong study design
+(wrong study design),wrong study design
+bilingual children were screened based on vocabulary,wrong study design
+groups defined based on vocab,wrong study design
+no vocab data,wrong study design
+- data reported for the whole sample (mon/bil),wrong/mixed population
+(bilingual status/language exposure not adequately specified),wrong/mixed population
+(children’s language exposure and input across monolingual vs. bilingual education programs are not clearly specified),wrong/mixed population
+(data collapsed for monolingual and multilingual children),wrong/mixed population
+(data not reported separately for monolinguals and bilinguals-data collapsed),wrong/mixed population
+(data not reported separately for monolinguals and bilinguals),wrong/mixed population
+"(data reported for the whole sample, no separate statistics were provided for monolingual vs. bilingual children.)",wrong/mixed population
+"(missing data: reporting data only on 6 children, which are labelled as monolingual or bilingual and it is unclear who they are; moreovier, monolinguals received a bilingual exposure)",wrong/mixed population
+(mono-bil combined data),wrong/mixed population
+(participant characteristics not reported separately by group),wrong/mixed population
+(unclear population: bilingual status not specified),wrong/mixed population
+"(vocabulary data reported for a mixed sample of monolingual and bilingual children, with no separate results for bilingual participants)",wrong/mixed population
+"(worng population: not sure if bilinguals, geographical area nor which is their l1 and l2)",wrong/mixed population
+(wrong outcome; longitudinal study where it is not clear the vocabulary scores of monolinguals' and bilinguals' groups),wrong/mixed population
+"(wrong population; ""all families were resettled in canada as refugees in 2015–2017 and had a mean length of residency in canada of 23.05 months (sd = 7.44; range = 2–37)"")",wrong/mixed population
+(wrong population; both mono and bilinguals),wrong/mixed population
+(wrong population; children exposed to a sign language),wrong/mixed population
+"(wrong population; immigrant families in us enrolled in supporting education program, i.e.  success for all; potential bias on boosting language but should be considered as a bias or an exclusion criteria?)",wrong/mixed population
+(wrong population; monolinguals),wrong/mixed population
+(wrong population; no bilinguals),wrong/mixed population
+"(wrong population; not sure if bilinguals ""92% had mothers who spoke english as a first language""; what about of the remaining 8%?)",wrong/mixed population
+(wrong population; not sure if children in one group are bilingual and if the other ones are just ell or dll),wrong/mixed population
+(wrong population; predominantly monolingual in a bilingual immersion group),wrong/mixed population
+(wrong population; unclear if children are all bilinguals beyond school program),wrong/mixed population
+(wrong population; unclear participants' lingual status; some children attended russian or armenian schools),wrong/mixed population
+(wrong population: adopted children),wrong/mixed population
+(wrong population: adults),wrong/mixed population
+(wrong population: balanced bilingual sample with no clear distinction between home and societal language).,wrong/mixed population
+(wrong population: bilingual children exposed to both languages through formal bilingual education).,wrong/mixed population
+(wrong population: bilingual sample attends preschool programs with teachers spending equal time speaking l1 and l2),wrong/mixed population
+(wrong population: bilingual who attends bilingual school  programs),wrong/mixed population
+(wrong population: bilinguals  who attend bilingual schools),wrong/mixed population
+"(wrong population: bilinguals defined ""had some exposure to english"")",wrong/mixed population
+(wrong population: children attended bilingual school programs),wrong/mixed population
+(wrong population: children enrolled in early total french immersion programs),wrong/mixed population
+(wrong population: children in bilingual classrooms with 50/50 spanish–english exposure),wrong/mixed population
+(wrong population: children may be english monolingual even though they come from hispanic family (see methods),wrong/mixed population
+(wrong population: internationally adopted children with unknown l1 and no bilingual exposure),wrong/mixed population
+(wrong population: not a bilingual sample),wrong/mixed population
+(wrong population: not bilingual sample).,wrong/mixed population
+(wrong population: participants were enrolled in l1 immersion education),wrong/mixed population
+"(wrong population: the “bilingual” group consists of children in a german-english partial immersion school, i.e. exposure to english is mainly school-program based rather than due to a bilingual/minority-language background)",wrong/mixed population
+"(wrong population:educational bilingual context (singapore); english is both home and school language, mandarin is a school-taught l2)",wrong/mixed population
+"(wrong study design; mixed population of monolinguals, bi-, tri-, and quadrilinguals",wrong/mixed population
+(wrong study design; not specify lingual status of participants;,wrong/mixed population
+data from mono and bi groups combined,wrong/mixed population
+mix of monolinguals and bilinguals,wrong/mixed population
+monolingual/bilingual results not reported separately,wrong/mixed population
+no bilinguals,wrong/mixed population
+relevant group-level data not reported,wrong/mixed population
+wrong population,wrong/mixed population

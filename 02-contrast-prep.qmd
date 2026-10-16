@@ -8,6 +8,7 @@ library(tidyverse)
 library(here)
 
 df_data <- readRDS(here("outputs", "df_data.rds"))
+df_paired <- readRDS(here("outputs", "df_paired.rds"))
 ```
 
 Helper functions
@@ -24,6 +25,16 @@ smd_independent <- function(m_trt, sd_trt, n_trt, m_ref, sd_ref, n_ref,
   
   yi <- if (type == "d") d else g
   
+  vi <- (n_trt + n_ref) / (n_trt * n_ref) + yi^2 / (2 * (n_trt + n_ref - 2))
+  tibble(y = yi, se_y = sqrt(vi), var_y = vi, d = d, g = g, J = J)
+}
+
+smd_from_t <- function(t, n_trt, n_ref, type = c("g", "d")) {
+  type <- match.arg(type)
+  d  <- t * sqrt(1 / n_trt + 1 / n_ref)
+  J  <- 1 - 3 / (4 * (n_trt + n_ref) - 9)
+  g  <- J * d
+  yi <- if (type == "d") d else g
   vi <- (n_trt + n_ref) / (n_trt * n_ref) + yi^2 / (2 * (n_trt + n_ref - 2))
   tibble(y = yi, se_y = sqrt(vi), var_y = vi, d = d, g = g, J = J)
 }
@@ -47,6 +58,27 @@ lang_overlap <- function(a, b) {
 }
 ```
 
+```{r}
+nma_arm_of <- function(lang_group, vocab_measure) {
+  case_when(
+    lang_group == "monolingual"                                        ~ 1L,
+    lang_group != "monolingual" & vocab_measure == "language-specific" ~ 2L,
+    lang_group != "monolingual" & vocab_measure == "total"             ~ 3L,
+    lang_group != "monolingual" & vocab_measure == "conceptual"        ~ 4L
+  )
+}
+
+score_lang_of <- function(lang_group, nma_arm, L1, L2, tool_L1, tool_L2) {
+  case_when(
+    lang_group == "monolingual"                      ~ L1,
+    nma_arm == 2L & !is.na(tool_L1)                  ~ L1,
+    nma_arm == 2L & is.na(tool_L1) & !is.na(tool_L2) ~ L2,
+    nma_arm %in% c(3L, 4L)                           ~ NA_character_
+  )
+}
+```
+
+
 # Assigning arms
 ```{r}
 df_arms <- df_data |>
@@ -56,28 +88,21 @@ df_arms <- df_data |>
       lang_group == "monolingual"
   ) |>
   mutate(
-    nma_arm = case_when(
-      lang_group == "monolingual"                                         ~ 1L,
-      lang_group != "monolingual" & vocab_measure == "language-specific"  ~ 2L,
-      lang_group != "monolingual" & vocab_measure == "total"              ~ 3L,
-      lang_group != "monolingual" & vocab_measure == "conceptual"         ~ 4L
-    ),
+    nma_arm = nma_arm_of(lang_group, vocab_measure), 
     # Language this score represents (only meaningful for mono + bi_L1 arm)
-    score_language = case_when(
-      lang_group == "monolingual"                     ~ L1,
-      nma_arm == 2L & !is.na(assessment_tool_L1)      ~ L1,
-      nma_arm == 2L & is.na(assessment_tool_L1) & !is.na(assessment_tool_L2) ~ L2,
-      nma_arm %in% c(3L, 4L)                          ~ NA_character_
-    )
+    score_language = score_lang_of(lang_group, nma_arm, L1, L2, 
+                                   assessment_tool_L1, assessment_tool_L2)
   ) |>
   filter(!is.na(nma_arm))
 
-grand_age_mean <- mean(df_arms$age_mean, na.rm = TRUE)
+grand_age_mean <- mean(c(df_arms$age_mean, df_paired$age_mean_1, df_paired$age_mean_2),
+                       na.rm = TRUE)
 ```
 
 ```{r}
 df_dropped <- df_data |> 
-  filter(is.na(vocab_score_mean) | is.na(vocab_score_sd) | is.na(N))
+  filter(is.na(vocab_score_mean) | is.na(vocab_score_sd) | is.na(N)) |>
+  filter(!short_cite %in% df_paired$short_cite)
 ```
 
 
@@ -98,7 +123,7 @@ df_contrasts <- df_arms |>
         non_ref |> select(arm_trt = nma_arm, ppt_trt = ppt_group,
                           m_trt   = vocab_score_mean, sd_trt = vocab_score_sd,
                           n_trt   = N, age_trt = age_mean,
-                          lang_trt = score_language),
+                          lang_trt = score_language, L1, L2),
         mono |>    select(arm_ref = nma_arm, ppt_ref = ppt_group,
                           m_ref   = vocab_score_mean, sd_ref = vocab_score_sd,
                           n_ref   = N, age_ref = age_mean,
@@ -121,7 +146,7 @@ df_contrasts <- df_arms |>
         trt_rows |> select(arm_trt = nma_arm, ppt_trt = ppt_group,
                            m_trt   = vocab_score_mean, sd_trt = vocab_score_sd,
                            n_trt   = N, age_trt = age_mean,
-                           lang_trt = score_language),
+                           lang_trt = score_language, L1, L2),
         ref_rows |> select(arm_ref = nma_arm, ppt_ref = ppt_group,
                            m_ref   = vocab_score_mean, sd_ref = vocab_score_sd,
                            n_ref   = N, age_ref = age_mean,
@@ -131,16 +156,68 @@ df_contrasts <- df_arms |>
     
     pairs
   }) |>
-  ungroup() |>
-  mutate(
-    age_c = (age_trt - grand_age_mean) / 12
-  )
+  ungroup() |> 
+  mutate(compare_group = as.numeric(compare_group))
 
 es <- with(
   df_contrasts,
-  # Effect sizes (choose type = "g" or "d")
   smd_independent(m_trt, sd_trt, n_trt, m_ref, sd_ref, n_ref, type = "g")
 )
+
+df_contrasts <- df_contrasts |>
+  bind_cols(es) |>
+  filter(!is.na(y), !is.na(se_y))
+```
+
+```{r}
+df_contrasts_t <- df_paired |>
+  mutate(
+    arm_1 = nma_arm_of(lang_group_1, vocab_measure),
+    arm_2 = nma_arm_of(lang_group_2, vocab_measure),
+    lang_1 = score_lang_of(lang_group_1, arm_1, L1_1, L2_1,
+                           assessment_tool_L1_1, assessment_tool_L2_1),
+    lang_2 = score_lang_of(lang_group_2, arm_2, L1_2, L2_2,
+                           assessment_tool_L1_2, assessment_tool_L2_2)
+  ) |>
+  filter(!is.na(arm_1), !is.na(arm_2), arm_1 != arm_2,
+         !is.na(t_score), !is.na(N_1), !is.na(N_2)) |>
+  mutate(
+    group1_is_ref = if_else(arm_1 == 1L | arm_2 == 1L, arm_1 == 1L, arm_1 < arm_2),
+    arm_trt  = if_else(group1_is_ref, arm_2, arm_1),
+    arm_ref  = if_else(group1_is_ref, arm_1, arm_2),
+    ppt_trt  = if_else(group1_is_ref, ppt_group_2, ppt_group_1),
+    ppt_ref  = if_else(group1_is_ref, ppt_group_1, ppt_group_2),
+    m_trt    = if_else(group1_is_ref, vocab_score_mean_2, vocab_score_mean_1),
+    m_ref    = if_else(group1_is_ref, vocab_score_mean_1, vocab_score_mean_2),
+    sd_trt   = if_else(group1_is_ref, vocab_score_sd_2, vocab_score_sd_1),
+    sd_ref   = if_else(group1_is_ref, vocab_score_sd_1, vocab_score_sd_2),
+    n_trt    = if_else(group1_is_ref, N_2, N_1),
+    n_ref    = if_else(group1_is_ref, N_1, N_2),
+    age_trt  = if_else(group1_is_ref, age_mean_2, age_mean_1),
+    age_ref  = if_else(group1_is_ref, age_mean_1, age_mean_2),
+    lang_trt = if_else(group1_is_ref, lang_2, lang_1),
+    lang_ref = if_else(group1_is_ref, lang_1, lang_2),
+    t_signed = if_else(group1_is_ref, -t_score, t_score)
+  ) |>
+  filter(arm_trt != 2L | lang_overlap(lang_trt, lang_ref) %in% TRUE)
+
+es_t <- with(df_contrasts_t, smd_from_t(t_signed, n_trt, n_ref, type = "g"))
+
+df_contrasts_t <- df_contrasts_t |>
+  bind_cols(es_t) |>
+  filter(!is.na(y), !is.na(se_y)) |>
+  select(short_cite, compare_group, vocab_type, vocab_units, infant_typical,
+         assessment_procedure, arm_trt, ppt_trt, m_trt, sd_trt, n_trt, age_trt,
+         lang_trt, arm_ref, ppt_ref, m_ref, sd_ref, n_ref, age_ref, lang_ref,
+         y, se_y, var_y, d, g, J, L1 = L1_2, L2 = L2_2)
+```
+
+```{r}
+lang_dist <- read_csv(here("data", "language_pairs.csv"))
+
+df_contrasts <- bind_rows(df_contrasts, df_contrasts_t) |>
+  mutate(age_c = (age_trt - grand_age_mean) / 12) |> 
+  left_join(lang_dist, by = join_by(L1, L2))
 
 key_trt <- paste(df_contrasts$short_cite, df_contrasts$ppt_trt)
 key_ref <- paste(df_contrasts$short_cite, df_contrasts$ppt_ref)
@@ -148,13 +225,9 @@ key_ref <- paste(df_contrasts$short_cite, df_contrasts$ppt_ref)
 key_all <- sort(unique(c(key_trt, key_ref)))
 
 df_contrasts <- df_contrasts |>
-  bind_cols(es) |> 
-  filter(!is.na(y), !is.na(se_y)) |>
-  # ── Integer indices ──────────────────────────────────────────────────────
   mutate(
     study_id   = as.integer(factor(short_cite)),
     comp_id    = as.integer(factor(paste(short_cite, compare_group, vocab_type))),
-    # IMPORTANT: ppt_id should link same cohort across timepoints
     ppt_trt_id = match(paste(short_cite, ppt_trt), key_all),
     ppt_ref_id = match(paste(short_cite, ppt_ref), key_all),
     paired     = as.integer(ppt_trt_id == ppt_ref_id)
@@ -172,22 +245,27 @@ matched <- df_contrasts |>
   count(lang_trt, lang_ref, match)
 
 lost <- anti_join(
-  df_arms |> distinct(short_cite),
+  bind_rows(
+    df_arms |> distinct(short_cite),
+    df_paired |> distinct(short_cite)
+  ),
   df_contrasts |> distinct(short_cite),
   by = "short_cite"
 )
 if (nrow(lost) > 0) message("Studies with no valid contrasts: ",
                             paste(lost$short_cite, collapse = ", "))
-
 ```
 
 ```{r}
 sum_btw <- df_contrasts |> 
   mutate(between = arm_ref == 1L) |> 
-  select(short_cite, between) |> 
-  distinct()
+  select(short_cite, between)
 
-sum_btw |> count(between)
+sum_sum_btw <- sum_btw |> 
+  group_by(short_cite) |> 
+  summarise(between = max(between)) |> 
+  count(between)
+
+sum_sum_btw
 ```
-
 

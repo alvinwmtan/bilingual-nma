@@ -7,8 +7,10 @@ format: html
 library(tidyverse)
 library(cmdstanr)
 library(here)
+library(patchwork)
 
 fits <- readRDS(here("outputs", "fits.rds"))
+df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
 ```
 
 # Summary
@@ -39,7 +41,7 @@ summarise_fit <- function(fit, spec_name, draws = FALSE) {
 
 ```{r}
 df_res_all <- imap(fits, summarise_fit) |> bind_rows()
-write_csv(df_res_all, "df_res_all.csv")
+write_csv(df_res_all, here("outputs", "df_res_all.csv"))
 ```
 
 ```{r eval=F}
@@ -48,31 +50,39 @@ df_draws <- imap(fits, \(f, n) summarise_fit(f, n, draws = TRUE)) |> bind_rows()
 
 # Plotting
 ```{r}
-p_res <- df_res_all |> 
-  separate_wider_delim(variable, delim = "[", too_few = "align_start", 
-                       names = c("variable", "comparison")) |> 
+arm_lab <- c(`2` = "single-language", `3` = "total", `4` = "conceptual")
+covar_lab <- c(
+  `1` = "Age",
+  `2` = "Vocab domain",
+  `3` = "Typical devt",
+  `4` = "Inst type",
+  `5` = "ASJP dist"
+)
+
+p_res <- df_res_all |>
+  filter(model %in% c("base", "full")) |>
+  separate_wider_delim(variable, delim = "[", too_few = "align_start",
+                       names = c("variable", "comparison")) |>
   filter(variable != "Omega",
-         !str_starts(variable, "d_")) |> 
-  mutate(comparison = str_remove_all(comparison, "(,1)?]") |> 
+         !str_starts(variable, "d_"),
+         variable != "beta") |>
+  mutate(comparison = str_remove_all(comparison, "(,1)?]") |>
            factor(levels = c(1, 2, 3),
                   labels = c("single-language", "total", "conceptual")),
-         model = factor(model, 
-                        levels = c("base", "age", "vocab_type", 
-                                   "assessment_procedure", "infant_typical"),
-                        labels = c("Base", "Age", "Vocab domain",
-                                   "Inst type", "Typical devt")),
-         variable = factor(variable, 
-                           levels = c("mu_d", "sigma_within", "sigma_ppt", 
-                                      "tau", "beta"),
-                           labels = c("Effect size", "Within corr var", 
-                                      "Between var", "Heterogeneity", 
-                                      "Regression coef")) |> 
+         model = factor(model, levels = c("base", "full"),
+                        labels = c("Base", "Full")),
+         variable = factor(variable,
+                           levels = c("mu_d", "sigma_within", "sigma_ppt", "tau"),
+                           labels = c("Effect size", "Within corr var",
+                                      "Between var", "Heterogeneity")) |>
            fct_rev(),
-         credible = ifelse(sign(q2.5) == sign(q97.5), "credible", "not credible")) |> 
-  ggplot(aes(x = mean, y = variable, col = comparison)) +
+         credible = if_else(sign(q2.5) == sign(q97.5), "credible", "not credible")) |>
+  ggplot(aes(x = mean, y = variable, col = comparison, group = comparison)) +
   geom_vline(xintercept = 0, lty = "dashed") +
-  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), height = 0) +
-  geom_point(aes(shape = credible)) +
+  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), height = 0,
+                position = position_dodge(0.5)) +
+  geom_point(aes(shape = credible),
+                position = position_dodge(0.5)) +
   facet_grid(~ model) +
   scale_shape_manual(values = c(16, 1)) +
   theme_bw() +
@@ -80,12 +90,462 @@ p_res <- df_res_all |>
         legend.position = "bottom",
         legend.box = "vertical",
         legend.spacing = unit(0, "pt")) +
-  labs(x = "Posterior estimate", y = "", col = "Vocab measure", shape = "Crediblility")
+  labs(x = "Posterior estimate", y = "", col = "Vocab measure", shape = "Credibility")
 
 p_res
+```
 
-# vocab_domain: receptive - expressive
-# inst_type = indirect - direct
-# typical_devt = typical - atypical
+```{r}
+p_beta <- df_res_all |>
+  filter(model == "full", str_starts(variable, fixed("beta["))) |>
+  mutate(
+    k = str_match(variable, "beta\\[(\\d+),(\\d+)\\]")[, 2],
+    p = str_match(variable, "beta\\[(\\d+),(\\d+)\\]")[, 3],
+    comparison = factor(k, levels = c("1", "2", "3"),
+                        labels = c("single-language", "total", "conceptual")),
+    covariate = factor(p, levels = names(covar_lab), labels = unname(covar_lab)),
+    credible = if_else(sign(q2.5) == sign(q97.5), "credible", "not credible")
+  ) |>
+  ggplot(aes(x = mean, y = covariate, col = comparison, group = comparison)) +
+  geom_vline(xintercept = 0, lty = "dashed") +
+  geom_errorbar(aes(xmin = q2.5, xmax = q97.5), height = 0,
+                position = position_dodge(.5)) +
+  geom_point(aes(shape = credible), 
+             position = position_dodge(.5)) +
+  scale_shape_manual(values = c(16, 1)) +
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.spacing = unit(0, "pt")) +
+  labs(x = "Posterior estimate", y = "", col = "Vocab measure",
+       shape = "Credibility")
+
+p_beta
+
+# vocab_c: expressive − receptive; proc_c: direct − indirect; typical_c: typical − atypical
+```
+
+# Moderator plots
+Lines and bands are from the **full** model at the grand mean (other covariates held at 0 under ±0.5 / centred coding). Points are complete-case rows. Categorical predictors dodge by vocab measure so the mean+CI sits on that measure’s points. The strip above each panel is a histogram of bilingual–bilingual contrasts at those \(x\)-values. Main panels are monolingual vs bilingual; bilingual vs bilingual are plotted separately.
+
+```{r}
+full_f <- ~ age_c + vocab_c + typical_c + proc_c + asjp_c
+full_raw <- c("age_c", "vocab_type", "infant_typical", "assessment_procedure", "asjp_dist")
+
+moderator_specs <- list(
+  age                  = list(x = "age_c",                xlab = "Age (years)",         title = "Age"),
+  vocab_type           = list(x = "vocab_type",           xlab = "Vocab domain",         title = "Vocab domain"),
+  infant_typical       = list(x = "infant_typical",       xlab = "Typical development",  title = "Typical development"),
+  assessment_procedure = list(x = "assessment_procedure", xlab = "Assessment type",      title = "Assessment type"),
+  asjp_dist            = list(x = "asjp_dist",            xlab = "ASJP distance",        title = "ASJP distance")
+)
+
+make_grid <- function(df, xvar) {
+  asjp_center <- mean(df$asjp_dist)
+  if (is.numeric(df[[xvar]])) {
+    xs <- seq(min(df[[xvar]]), max(df[[xvar]]), length.out = 80)
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, 80), ]
+    if (xvar == "age_c") grid$age_c <- xs
+    if (xvar == "asjp_dist") grid$asjp_c <- xs - asjp_center
+  } else {
+    xs <- sort(unique(df[[xvar]]))
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, length(xs)), ]
+    if (xvar == "vocab_type")
+      grid$vocab_c <- if_else(as.character(xs) == "expressive", 0.5, -0.5)
+    if (xvar == "infant_typical")
+      grid$typical_c <- if_else(xs, 0.5, -0.5)
+    if (xvar == "assessment_procedure")
+      grid$proc_c <- if_else(as.character(xs) == "direct", 0.5, -0.5)
+  }
+  grid[[xvar]] <- xs
+  grid
+}
+
+pairs_mono <- list(
+  list(trt = 2L, ref = 1L),
+  list(trt = 3L, ref = 1L),
+  list(trt = 4L, ref = 1L)
+)
+pairs_bi <- list(
+  list(trt = 3L, ref = 2L),
+  list(trt = 4L, ref = 2L),
+  list(trt = 4L, ref = 3L)
+)
+
+pair_lab <- function(trt, ref) {
+  if (ref == 1L) unname(arm_lab[as.character(trt)])
+  else paste0(arm_lab[as.character(trt)], " vs ", arm_lab[as.character(ref)])
+}
+
+model_band <- function(fit, formula, grid, pairs) {
+  X <- model.matrix(formula, grid)
+  X <- X[, setdiff(colnames(X), "(Intercept)"), drop = FALSE]
+  mu   <- as.matrix(fit$draws("mu_d", format = "draws_matrix"))
+  beta <- as.matrix(fit$draws("beta", format = "draws_matrix"))
+  P <- ncol(X)
+  map(pairs, function(pr) {
+    k_trt <- pr$trt - 1L
+    k_ref <- pr$ref - 1L
+    mu_eta <- if (k_trt > 0) mu[, k_trt] else 0
+    if (k_ref > 0) mu_eta <- mu_eta - mu[, k_ref]
+    b <- matrix(0, nrow(mu), P)
+    if (k_trt > 0) b <- b + beta[, paste0("beta[", k_trt, ",", seq_len(P), "]"), drop = FALSE]
+    if (k_ref > 0) b <- b - beta[, paste0("beta[", k_ref, ",", seq_len(P), "]"), drop = FALSE]
+    eta <- sweep(b %*% t(X), 1, mu_eta, "+")
+    grid |>
+      mutate(
+        comparison = pair_lab(pr$trt, pr$ref),
+        mean = colMeans(eta),
+        q2.5 = apply(eta, 2, quantile, 0.025),
+        q97.5 = apply(eta, 2, quantile, 0.975)
+      )
+  }) |> list_rbind()
+}
+
+plot_moderator <- function(spec, pairs, title) {
+  xvar <- spec$x
+  df_fit <- df_contrasts |> drop_na(all_of(full_raw))
+  grid <- make_grid(df_fit, xvar)
+  band <- model_band(fits$full, full_f, grid, pairs)
+  keys <- map_chr(pairs, \(p) paste(p$trt, p$ref))
+  comps <- unique(map_chr(pairs, \(p) pair_lab(p$trt, p$ref)))
+  pts <- df_fit |>
+    filter(paste(arm_trt, arm_ref) %in% keys) |>
+    mutate(
+      comparison = factor(map2_chr(arm_trt, arm_ref, pair_lab), levels = comps),
+      oob = case_when(y > 8 ~ "hi", y < -8 ~ "lo", .default = "in"),
+      y_plot = pmin(pmax(y, -8), 8)
+    )
+  band <- band |> mutate(comparison = factor(comparison, levels = comps))
+
+  pretty_x <- function(d) {
+    if (xvar == "infant_typical")
+      d[[xvar]] <- factor(d[[xvar]], levels = c(FALSE, TRUE),
+                          labels = c("atypical", "typical"))
+    d
+  }
+  band <- pretty_x(band)
+  pts  <- pretty_x(pts)
+
+  if (xvar == "age_c") {
+    grand_age <- mean(df_fit$age_trt - 12 * df_fit$age_c, na.rm = TRUE)
+    pts  <- pts  |> mutate(x_plot = age_trt / 12)
+    band <- band |> mutate(x_plot = age_c + grand_age / 12)
+  } else {
+    pts  <- pts  |> mutate(x_plot = .data[[xvar]])
+    band <- band |> mutate(x_plot = .data[[xvar]])
+  }
+
+  bi_keys <- map_chr(pairs_bi, \(p) paste(p$trt, p$ref))
+  hist_df <- df_fit |>
+    filter(paste(arm_trt, arm_ref) %in% bi_keys) |>
+    pretty_x()
+  if (xvar == "age_c") {
+    hist_df <- hist_df |> mutate(x_plot = age_trt / 12)
+  } else {
+    hist_df <- hist_df |> mutate(x_plot = .data[[xvar]])
+  }
+
+  is_cat <- !is.numeric(pts$x_plot)
+  p <- ggplot() + geom_hline(yintercept = 0, lty = "dashed")
+
+  if (is_cat) {
+    x_lvls <- if (is.factor(pts$x_plot)) levels(pts$x_plot) else sort(unique(as.character(pts$x_plot)))
+    pts     <- pts     |> mutate(x_plot = factor(x_plot, levels = x_lvls))
+    band    <- band    |> mutate(x_plot = factor(x_plot, levels = x_lvls))
+    hist_df <- hist_df |> mutate(x_plot = factor(as.character(x_plot), levels = x_lvls))
+    n_comp <- nlevels(pts$comparison)
+    dw <- 0.6
+    dodge_off <- \(g) (as.integer(g) - (n_comp + 1) / 2) * (dw / n_comp)
+    pts  <- pts  |> mutate(x_num = as.numeric(x_plot) + dodge_off(comparison) +
+                             runif(n(), -0.06, 0.06))
+    band <- band |> mutate(x_num = as.numeric(x_plot) + dodge_off(comparison))
+    p <- p +
+      geom_point(aes(x_num, y_plot, color = comparison, fill = comparison, shape = oob),
+                 data = pts, alpha = 0.15) +
+      geom_pointrange(aes(x_num, y = mean, ymin = q2.5, ymax = q97.5, color = comparison),
+                      data = band) +
+      scale_x_continuous(breaks = seq_along(x_lvls), labels = x_lvls, expand = c(0, 0)) +
+      coord_cartesian(ylim = c(-8, 8), xlim = c(0.4, length(x_lvls) + 0.6))
+    p_hist <- ggplot(hist_df, aes(as.numeric(x_plot))) +
+      geom_bar(fill = "grey55", width = 0.2) +
+      scale_x_continuous(breaks = seq_along(x_lvls), expand = c(0, 0)) +
+      coord_cartesian(xlim = c(0.4, length(x_lvls) + 0.6))
+  } else {
+    p <- p +
+      geom_point(aes(x_plot, y_plot, color = comparison, fill = comparison, shape = oob),
+                 data = pts, alpha = 0.15) +
+      geom_ribbon(aes(x_plot, ymin = q2.5, ymax = q97.5, fill = comparison, group = comparison),
+                  data = band, alpha = 0.2, color = NA) +
+      geom_line(aes(x_plot, mean, color = comparison, group = comparison), data = band)
+    x_rng <- range(c(pts$x_plot, band$x_plot, hist_df$x_plot), na.rm = TRUE)
+    p_hist <- ggplot(hist_df, aes(x_plot)) +
+      geom_histogram(fill = "grey55", bins = 20, color = NA) +
+      coord_cartesian(xlim = x_rng)
+    p <- p + coord_cartesian(ylim = c(-8, 8), xlim = x_rng)
+  }
+
+  p <- p +
+    scale_shape_manual(values = c(`in` = 16, hi = 24, lo = 25), guide = "none") +
+    theme_bw() +
+    theme(panel.grid = element_blank(), legend.position = "bottom") +
+    labs(x = spec$xlab, y = "Hedges' g",
+         color = NULL, fill = NULL, title = title)
+
+  p_hist <- p_hist +
+    theme_bw() +
+    theme(panel.grid = element_blank(),
+          axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(5.5, 5.5, 0, 5.5)) +
+    labs(y = "N", title = NULL)
+
+  p_hist / p + plot_layout(heights = c(0.22, 1), axes = "collect_x")
+}
+```
+
+```{r}
+walk(moderator_specs, \(spec) {
+  print(plot_moderator(spec, pairs_mono, ""))
+})
+```
+
+```{r eval=F}
+walk(moderator_specs, \(spec) {
+  print(plot_moderator(spec, pairs_bi, paste(spec$title, "— bi vs bi")))
+})
+```
+
+# Network plots
+Edges are the same quantities as the forest plot: \(\mu_d\) for mono vs each bilingual arm, and \(\mu_d[k]-\mu_d[j]\) for bilingual vs bilingual (grand mean, \(X=0\)). Width is \(|\text{posterior median}|\); dashed if the 95% interval includes 0.
+
+```{r}
+plot_network <- function(fit, title) {
+  mu <- as.matrix(fit$draws("mu_d", format = "draws_matrix"))
+  abs_d <- cbind(0, mu)
+  nodes <- tibble(
+    arm = 1:4,
+    name = c("Mono", "Bi-LS", "Bi-TV", "Bi-CV"),
+    x = c(0, 1, 0, 1),
+    y = c(1, 1, 0, 0)
+  )
+  edges <- list(c(1L, 2L), c(1L, 3L), c(1L, 4L), c(2L, 3L), c(2L, 4L), c(3L, 4L)) |>
+    map(\(pr) {
+      d <- abs_d[, pr[2]] - abs_d[, pr[1]]
+      tibble(
+        from = pr[1], to = pr[2],
+        median = median(d),
+        q2.5 = unname(quantile(d, 0.025)),
+        q97.5 = unname(quantile(d, 0.975))
+      )
+    }) |> list_rbind() |>
+    left_join(nodes |> select(from = arm, x1 = x, y1 = y), by = "from") |>
+    left_join(nodes |> select(to = arm, x2 = x, y2 = y), by = "to") |>
+    mutate(
+      crosses0 = sign(q2.5) != sign(q97.5),
+      lab = sprintf("%.2f", abs(median)),
+      xm = (x1 + x2) / 2 + case_when(from == 1 & to == 4 ~ -0.12, from == 2 & to == 3 ~ -0.12, .default = 0),
+      ym = (y1 + y2) / 2 + case_when(from == 1 & to == 4 ~  0.12, from == 2 & to == 3 ~ -0.12, .default = 0)
+    )
+
+  ggplot() +
+    geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2,
+                     linewidth = abs(median), linetype = crosses0),
+                 data = edges, color = "grey30") +
+    geom_label(aes(xm, ym, label = lab), data = edges, size = 3, label.size = 0) +
+    geom_point(aes(x, y), data = nodes, size = 12, color = "white") +
+    geom_point(aes(x, y), data = nodes, size = 12, shape = 1, color = "grey20") +
+    geom_text(aes(x, y, label = name), data = nodes, size = 3.2) +
+    scale_linewidth(range = c(0.4, 4), guide = "none") +
+    scale_linetype_manual(values = c(`FALSE` = "solid", `TRUE` = "dashed"), guide = "none") +
+    coord_equal(xlim = c(-0.35, 1.35), ylim = c(-0.35, 1.35)) +
+    theme_void() +
+    labs(title = title)
+}
+
+plot_network(fits$base, "Base model")
+plot_network(fits$full, "Full model")
+```
+
+# Results reporting
+
+Outcome `y` is Hedges *g*, so $SD_y = 1$ and the RQ1 ROPE $[-0.1\,SD_y,\,0.1\,SD_y]$ is $[-0.1,\,0.1]$. Covariate ROPE is also $[-0.1,\,0.1]$. Age (years) and ASJP are mean-centred; binaries use $(-0.5,+0.5)$, so $\mu_d$ is a grand mean (comparable to the base model) and each $\beta$ is still the full group difference.
+
+```{r}
+hdi95 <- function(x) {
+  x <- sort(as.numeric(x))
+  n <- length(x)
+  k <- max(1L, floor(0.95 * n))
+  w <- x[k:n] - x[seq_len(n - k + 1)]
+  i <- which.min(w)
+  c(x[i], x[i + k - 1])
+}
+
+summarise_draws <- function(x, rope = c(-0.1, 0.1), rule = c("in", "out")) {
+  rule <- match.arg(rule)
+  h <- hdi95(x)
+  p_in <- mean(x >= rope[1] & x <= rope[2])
+  tibble(
+    median = median(x),
+    hdi_lo = h[1],
+    hdi_hi = h[2],
+    p_in_rope = p_in,
+    p_out_rope = 1 - p_in,
+    decision = if (rule == "in") {
+      if (p_in > 0.95) "practically equivalent to 0" else "not equivalent to 0"
+    } else {
+      if (1 - p_in > 0.95) "significant (outside ROPE)" else "not significant"
+    }
+  )
+}
+
+comp_lab <- c(
+  `1` = "mono vs single-language",
+  `2` = "mono vs total",
+  `3` = "mono vs conceptual"
+)
+
+pool_dl <- function(y, se) {
+  ok <- is.finite(y) & is.finite(se) & se > 0
+  y <- y[ok]; se <- se[ok]
+  if (length(y) == 0) return(tibble(est = NA_real_, se = NA_real_, n = 0))
+  w <- 1 / se^2
+  fe <- sum(w * y) / sum(w)
+  Q <- sum(w * (y - fe)^2)
+  k <- length(y)
+  den <- sum(w) - sum(w^2) / sum(w)
+  tau2 <- if (k > 1 && den > 0) max(0, (Q - (k - 1)) / den) else 0
+  wr <- 1 / (se^2 + tau2)
+  tibble(est = sum(wr * y) / sum(wr), se = sqrt(1 / sum(wr)), n = k)
+}
+
+node_split_one <- function(name, dir_trt, dir_ref, path) {
+  d <- df_contrasts |> filter(arm_trt == dir_trt, arm_ref == dir_ref)
+  pd <- pool_dl(d$y, d$se_y)
+  parts <- map(path, \(pr) {
+    dat <- df_contrasts |> filter(arm_trt == pr[1], arm_ref == pr[2])
+    pool_dl(dat$y * pr[3], dat$se_y)
+  })
+  ind <- sum(map_dbl(parts, "est"))
+  ind_se <- sqrt(sum(map_dbl(parts, "se")^2))
+  inc <- pd$est - ind
+  inc_se <- sqrt(pd$se^2 + ind_se^2)
+  z <- inc / inc_se
+  tibble(
+    comparison = name,
+    n_direct = pd$n,
+    n_indirect = sum(map_int(parts, "n")),
+    direct = pd$est,
+    indirect = ind,
+    inconsistency = inc,
+    se = inc_se,
+    z = z,
+    p = 2 * pnorm(-abs(z))
+  )
+}
+```
+
+```{r}
+cat("Priors (weakly informative): mu_d ~ N(0,1); beta ~ N(0,0.5); tau, sigma_within, sigma_ppt ~ N+(0,0.3); L_Omega ~ LKJ(2)\n")
+cat("MCMC: 4 chains, 1000 warmup, 2000 sampling, adapt_delta = 0.95\n\n")
+
+conv <- imap(fits, \(fit, nm) {
+  vars <- c("mu_d", "tau", "sigma_within", "sigma_ppt")
+  if (any(grepl("^beta", fit$metadata()$stan_variables))) vars <- c(vars, "beta")
+  s <- fit$summary(vars, "rhat", "ess_bulk")
+  d <- fit$diagnostic_summary()
+  tibble(
+    model = nm,
+    max_Rhat = max(s$rhat, na.rm = TRUE),
+    min_ess = min(s$ess_bulk, na.rm = TRUE),
+    divergences = sum(d$num_divergent)
+  )
+}) |> list_rbind()
+
+cat("Convergence (Brooks–Gelman–Rubin R-hat; all < 1.01 is the usual threshold)\n")
+print(conv, n = Inf)
+```
+
+```{r}
+# RQ1: base model, three mono vs bi comparisons
+mu <- as.matrix(fits$base$draws("mu_d", format = "draws_matrix"))
+tau <- as.matrix(fits$base$draws("tau", format = "draws_matrix"))
+s2 <- df_contrasts |>
+  filter(arm_ref == 1) |>
+  group_by(k = arm_trt - 1) |>
+  summarise(s2 = median(se_y^2), .groups = "drop")
+
+rq1 <- map(1:3, \(k) {
+  summarise_draws(mu[, k], rule = "in") |>
+    mutate(comparison = comp_lab[as.character(k)], .before = 1)
+}) |> list_rbind()
+
+i2 <- map(1:3, \(k) {
+  s2k <- s2$s2[s2$k == k]
+  i2_draws <- tau[, k]^2 / (tau[, k]^2 + s2k)
+  h <- hdi95(i2_draws)
+  tibble(
+    comparison = comp_lab[as.character(k)],
+    I2_median = median(i2_draws),
+    I2_hdi_lo = h[1],
+    I2_hdi_hi = h[2]
+  )
+}) |> list_rbind()
+
+cat("RQ1: posterior median and 95% HDI; ROPE [-0.1, 0.1]; equivalent if >95% of posterior is inside ROPE\n")
+print(rq1, n = Inf)
+cat("\nHeterogeneity I² = τ² / (τ² + median(se_y²))\n")
+print(i2, n = Inf)
+```
+
+```{r}
+# Bucher node-splitting: direct DL pool vs the complementary path
+ns <- bind_rows(
+  node_split_one("mono vs single-language", 2, 1, list(c(3, 1, 1), c(3, 2, -1))),
+  node_split_one("mono vs total",           3, 1, list(c(3, 2, 1), c(2, 1, 1))),
+  node_split_one("mono vs conceptual",      4, 1, list(c(4, 2, 1), c(2, 1, 1)))
+)
+cat("Node-splitting (Bucher): direct vs indirect; p tests inconsistency = 0\n")
+print(ns, n = Inf)
+```
+
+```{r}
+# RQ2–4: full-model slopes; need ≥8 studies per subgroup (Borenstein et al., 2009)
+rq24_specs <- list(
+  `1` = list(var = "age_c",                label = "age (per year, mean-centred)"),
+  `2` = list(var = "vocab_type",           label = "measure (expressive − receptive)"),
+  `3` = list(var = "infant_typical",       label = "typical development"),
+  `4` = list(var = "assessment_procedure", label = "instrument (direct − indirect)"),
+  `5` = list(var = "asjp_dist",            label = "ASJP distance")
+)
+
+n_sub <- imap(rq24_specs, \(sp, p) {
+  d <- df_contrasts |> drop_na(all_of(full_raw))
+  if (is.numeric(d[[sp$var]])) {
+    tibble(covariate = sp$label, subgroup = "all", n_studies = n_distinct(d$short_cite))
+  } else {
+    d |>
+      count(subgroup = as.character(.data[[sp$var]]), short_cite, name = "n") |>
+      count(subgroup, name = "n_studies") |>
+      mutate(covariate = sp$label, .before = 1)
+  }
+}) |> list_rbind() |>
+  mutate(ok = n_studies >= 8)
+
+cat("RQ2–4: studies per subgroup on the full-model complete-case sample (criterion: ≥8)\n")
+print(n_sub, n = Inf)
+
+beta_full <- as.matrix(fits$full$draws("beta", format = "draws_matrix"))
+rq24 <- imap(rq24_specs, \(sp, p) {
+  map(1:3, \(k) {
+    summarise_draws(beta_full[, paste0("beta[", k, ",", p, "]")], rule = "out") |>
+      mutate(covariate = sp$label, comparison = comp_lab[as.character(k)], .before = 1)
+  }) |> list_rbind()
+}) |> list_rbind()
+
+cat("\nRQ2–4: full-model covariate slopes; ROPE [-0.1, 0.1]; significant if >95% of posterior is outside ROPE\n")
+print(rq24, n = Inf)
 ```
 
