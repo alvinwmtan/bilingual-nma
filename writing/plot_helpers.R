@@ -4,6 +4,12 @@ bivoc_scale <- c(
   "total" = "#4a39a8"
 )
 
+comp_lab <- c(
+  `1` = "Bi-SL",
+  `2` = "Bi-TV",
+  `3` = "Bi-CV"
+)
+
 print_num <- function(x, digits = 2) {
   x |> round(digits) |> format(nsmall = digits)
 }
@@ -19,9 +25,27 @@ print_res <- function(df, term) {
   glue("{print_num(df_res$median)} [{print_num(df_res$q2.5)}, {print_num(df_res$q97.5)}]")
 }
 
+print_direct <- function(df, term) {
+  df_res <- df |> 
+    filter(str_detect(comparison, term))
+  glue("{print_num(df_res$direct)} [{print_num(df_res$direct_ci.lb)}, {print_num(df_res$direct_ci.ub)}]")
+}
+
+print_egger <- function(df, term) {
+  df_res <- df |> 
+    filter(str_detect(comparison, term))
+  glue("{print_num(df_res$intercept)} [{print_num(df_res$ci.lb)}, {print_num(df_res$ci.ub)}]")
+}
+
+print_ns <- function(df, term) {
+  df_res <- df |> 
+    filter(str_detect(comparison, term))
+  glue("{print_num(df_res$inc_network)} [{print_num(df_res$inc_network_ci.lb)}, {print_num(df_res$inc_network_ci.ub)}]")
+}
+
 make_grid <- function(newdata = NULL) {
-  coded <- c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")
-  x <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)
+  coded <- c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")
+  x <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)
   if (is.null(newdata)) return(x)
   nd <- as_tibble(newdata)
   x <- x[rep(1, nrow(nd)), ]
@@ -42,13 +66,14 @@ make_grid <- function(newdata = NULL) {
   if ("asjp_dist" %in% names(nd))
     x$asjp_c <- nd$asjp_dist - mean(df_contrasts$asjp_dist, na.rm = TRUE)
   if ("asjp_c" %in% names(nd)) x$asjp_c <- nd$asjp_c
+  if ("asjp_miss_c" %in% names(nd)) x$asjp_miss_c <- nd$asjp_miss_c
   bind_cols(nd |> select(-any_of(coded)), x)
 }
 
 arm_draws <- function(fit, x) {
   mu <- as.matrix(fit$draws("mu_d", format = "draws_matrix"))
   abs_d <- cbind(0, mu)
-  X <- unlist(x[c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")])
+  X <- unlist(x[c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")])
   beta <- as.matrix(fit$draws("beta", format = "draws_matrix"))
   for (k in 1:3) {
     bk <- beta[, paste0("beta[", k, ",", seq_along(X), "]"), drop = FALSE]
@@ -159,17 +184,18 @@ plot_moderator <- function(mod_full, xvar, xlab, tag = NULL) {
     list(trt = 4L, ref = 3L)
   )
   
-  df_fit <- df_contrasts |> 
-    drop_na(all_of(c("age_c", "vocab_type", "infant_typical", 
-                     "assessment_procedure", "asjp_dist")))
+  df_fit <- df_contrasts |>
+    drop_na(age_c, vocab_type, infant_typical, assessment_procedure)
+  if (xvar == "asjp_dist")
+    df_fit <- df_fit |> drop_na(asjp_dist)
   xs <- if (is.numeric(df_fit[[xvar]])) {
     seq(min(df_fit[[xvar]]), max(df_fit[[xvar]]), length.out = 80)
   } else {
     sort(unique(df_fit[[xvar]]))
   }
   grid <- make_grid(tibble(!!xvar := xs))
-  band <- model_band(mod_full, 
-                     formula(~ age_c + vocab_c + typical_c + proc_c + asjp_c), 
+  band <- model_band(mod_full,
+                     formula(~ age_c + vocab_c + typical_c + proc_c + asjp_c + asjp_miss_c),
                      grid, pairs_mono)
   
   keys <- map_chr(pairs_mono, \(p) paste(p$trt, p$ref))

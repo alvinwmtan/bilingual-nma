@@ -93,7 +93,7 @@ df_paired_long <- df_paired_wide |>
 ```{r}
 df_exclusions <- bind_rows(
   df_data_a |> 
-    filter(!is.na(exclusion_reason)) |> 
+    filter(!is.na(exclusion_reason) | has_full_text == "no") |> 
     mutate(compare_group = map_chr(compare_group, \(x) ifelse(is.null(x), "", as.character(x)))) |> 
     select(long_cite, short_cite, has_full_text, compare_group, exclusion_reason, notes),
   df_data_g |> 
@@ -140,6 +140,8 @@ df_exclusions <- df_exclusions |>
 df_exclusion_summary <- df_exclusions |> 
   group_by(exclusion_reason_cleaned) |> 
   summarise(n = n())
+saveRDS(df_exclusions, here("outputs", "df_exclusions.rds"))
+write_csv(df_exclusion_summary, here("outputs", "df_exclusion_summary.csv"))
 df_data_raw <- bind_rows(
   df_data_raw |> filter(!(long_cite %in% df_exclusions$long_cite)),
   df_paired_long |>

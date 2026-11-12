@@ -1,0 +1,128 @@
+---
+title: "Comparison-adjusted funnel"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(cmdstanr)
+library(here)
+library(brms)
+
+fits <- readRDS(here("outputs", "fits.rds"))
+df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
+```
+
+# Comparison-adjusted funnel
+
+Only the three bilingual–monolingual contrasts (Chaimani & Salanti, 2012). That keeps a shared direction (bilingual − monolingual) and avoids choosing which edge to plot from a multi-arm study. Effects are residualised at the grand mean using the full-model posterior-mean slopes, then centred on the comparison-specific RE mean (weights \(1/(\mathrm{se}^2+\tau^2)\)).
+
+```{r}
+full_raw <- c("age_c", "vocab_type", "infant_typical", "assessment_procedure")
+arm_lab <- c(`2` = "single-language", `4` = "conceptual", `3` = "total")
+bivoc_scale <- c(
+  "single-language" = "#de64bb",
+  "conceptual" = "#9452c7",
+  "total" = "#4a39a8"
+)
+
+df_cc <- df_contrasts |>
+  drop_na(all_of(full_raw)) |>
+  filter(arm_ref == 1, arm_trt %in% 2:4)
+
+asjp_center <- mean(df_cc$asjp_dist, na.rm = TRUE)
+df_cc <- df_cc |>
+  mutate(
+    vocab_c     = if_else(vocab_type == "expressive", 0.5, -0.5),
+    typical_c   = if_else(infant_typical, 0.5, -0.5),
+    proc_c      = if_else(assessment_procedure == "direct", 0.5, -0.5),
+    asjp_miss_c = if_else(is.na(asjp_dist), 0.5, -0.5),
+    asjp_c      = if_else(is.na(asjp_dist), 0, asjp_dist - asjp_center),
+    comparison  = factor(arm_lab[as.character(arm_trt)],
+                         levels = unname(arm_lab))
+  )
+
+X <- as.matrix(df_cc[, c("age_c", "vocab_c", "typical_c", "proc_c",
+                         "asjp_c", "asjp_miss_c")])
+P <- ncol(X)
+beta_bar <- colMeans(as.matrix(fits$full$draws("beta", format = "draws_matrix")))
+tau_bar  <- colMeans(as.matrix(fits$full$draws("tau", format = "draws_matrix")))
+
+xb <- numeric(nrow(df_cc))
+for (k in 1:3) {
+  idx <- df_cc$arm_trt == k + 1
+  bk <- beta_bar[paste0("beta[", k, ",", seq_len(P), "]")]
+  xb[idx] <- as.vector(X[idx, , drop = FALSE] %*% bk)
+}
+
+df_funnel <- df_cc |>
+  mutate(
+    y_adj = y - xb,
+    tau = tau_bar[arm_trt - 1],
+    w = 1 / (se_y^2 + tau^2)
+  ) |>
+  group_by(comparison) |>
+  mutate(
+    mu_comp = sum(w * y_adj) / sum(w),
+    y_star = y_adj - mu_comp
+  ) |>
+  ungroup() |> 
+  write_csv(here("outputs/df_funnel.csv"))
+```
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+
+se_max <- max(df_funnel$se_y) * 1.05
+band <- tibble(se = seq(0, se_max, length.out = 200)) |>
+  mutate(lo95 = -qnorm(0.975) * se, hi95 = qnorm(0.975) * se,
+         lo99 = -qnorm(0.995) * se, hi99 = qnorm(0.995) * se)
+
+egger_fit <- brm(I(y_star / se_y) ~ I(1 / se_y), data = df_funnel, silent = 2)
+saveRDS(egger_fit, here("outputs/egger_fit.rds"))
+egger_line <- tibble(se = seq(0, se_max, length.out = 80)) |>
+  mutate(y_star = fixef(egger_fit)[2] * se + fixef(egger_fit)[1])
+
+ggplot(df_funnel, aes(y_star, se_y, color = comparison)) +
+  geom_ribbon(aes(x = NULL, y = se, xmin = lo99, xmax = hi99),
+              data = band, inherit.aes = FALSE, fill = "grey92") +
+  geom_ribbon(aes(x = NULL, y = se, xmin = lo95, xmax = hi95),
+              data = band, inherit.aes = FALSE, fill = "grey80") +
+  geom_vline(xintercept = 0, lty = "dashed") +
+  geom_line(aes(y_star, se), data = egger_line, inherit.aes = FALSE,
+            color = "grey20", linewidth = 0.4) +
+  geom_point(alpha = 0.45, size = 1.4) +
+  scale_y_reverse() +
+  scale_color_manual(values = bivoc_scale) +
+  coord_cartesian(xlim = range(c(df_funnel$y_star, band$lo99, band$hi99))) +
+  theme(legend.position = "bottom") +
+  labs(x = "Comparison-adjusted g", y = "SE", color = "Vocab measure")
+```
+
+```{r}
+egger_one <- function(d) {
+  fit <- brm(I(y_star / se_y) ~ I(1 / se_y), data = d, silent = 2)
+  out <- fixef(fit)[1,]
+  tibble(
+    n_contrasts = nrow(d),
+    n_studies = n_distinct(d$short_cite),
+    intercept = unname(out["Estimate"]),
+    ci.lb = unname(out["Q2.5"]),
+    ci.ub = unname(out["Q97.5"])
+  )
+}
+
+egger_tab <- bind_rows(
+  egger_one(df_funnel) |> mutate(comparison = "overall"),
+  df_funnel |>
+    group_split(comparison) |>
+    map(\(d) egger_one(d) |> mutate(comparison = as.character(d$comparison[1]))) |>
+    list_rbind()
+) |>
+  relocate(comparison) |> 
+  write_csv(here("outputs/egger_tab.csv"))
+
+cat("Egger test on comparison-adjusted effects (intercept of g*/SE ~ 1/SE)\n")
+print(egger_tab, n = Inf)
+```

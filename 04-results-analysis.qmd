@@ -56,7 +56,8 @@ covar_lab <- c(
   `2` = "Vocab domain",
   `3` = "Typical devt",
   `4` = "Inst type",
-  `5` = "ASJP dist"
+  `5` = "ASJP dist",
+  `6` = "ASJP missing"
 )
 
 p_res <- df_res_all |>
@@ -127,11 +128,11 @@ p_beta
 ```
 
 # Moderator plots
-Lines and bands are from the **full** model at the grand mean (other covariates held at 0 under ±0.5 / centred coding). Points are complete-case rows. Categorical predictors dodge by vocab measure so the mean+CI sits on that measure’s points. The strip above each panel is a histogram of bilingual–bilingual contrasts at those \(x\)-values. Main panels are monolingual vs bilingual; bilingual vs bilingual are plotted separately.
+Lines and bands are from the **full** model at the grand mean (other covariates held at 0 under ±0.5 / centred coding). Points use all rows except the ASJP panel, which shows observed distances only. Categorical predictors dodge by vocab measure so the mean+CI sits on that measure’s points. The strip above each panel is a histogram of bilingual–bilingual contrasts at those \(x\)-values. Main panels are monolingual vs bilingual; bilingual vs bilingual are plotted separately.
 
 ```{r}
-full_f <- ~ age_c + vocab_c + typical_c + proc_c + asjp_c
-full_raw <- c("age_c", "vocab_type", "infant_typical", "assessment_procedure", "asjp_dist")
+full_f <- ~ age_c + vocab_c + typical_c + proc_c + asjp_c + asjp_miss_c
+full_raw <- c("age_c", "vocab_type", "infant_typical", "assessment_procedure")
 
 moderator_specs <- list(
   age                  = list(x = "age_c",                xlab = "Age (years)",         title = "Age"),
@@ -142,15 +143,15 @@ moderator_specs <- list(
 )
 
 make_grid <- function(df, xvar) {
-  asjp_center <- mean(df$asjp_dist)
+  asjp_center <- mean(df$asjp_dist, na.rm = TRUE)
   if (is.numeric(df[[xvar]])) {
     xs <- seq(min(df[[xvar]]), max(df[[xvar]]), length.out = 80)
-    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, 80), ]
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)[rep(1, 80), ]
     if (xvar == "age_c") grid$age_c <- xs
     if (xvar == "asjp_dist") grid$asjp_c <- xs - asjp_center
   } else {
     xs <- sort(unique(df[[xvar]]))
-    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, length(xs)), ]
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)[rep(1, length(xs)), ]
     if (xvar == "vocab_type")
       grid$vocab_c <- if_else(as.character(xs) == "expressive", 0.5, -0.5)
     if (xvar == "infant_typical")
@@ -206,6 +207,8 @@ model_band <- function(fit, formula, grid, pairs) {
 plot_moderator <- function(spec, pairs, title) {
   xvar <- spec$x
   df_fit <- df_contrasts |> drop_na(all_of(full_raw))
+  if (xvar == "asjp_dist")
+    df_fit <- df_fit |> drop_na(asjp_dist)
   grid <- make_grid(df_fit, xvar)
   band <- model_band(fits$full, full_f, grid, pairs)
   keys <- map_chr(pairs, \(p) paste(p$trt, p$ref))
@@ -407,42 +410,76 @@ comp_lab <- c(
   `3` = "mono vs conceptual"
 )
 
-pool_dl <- function(y, se) {
-  ok <- is.finite(y) & is.finite(se) & se > 0
-  y <- y[ok]; se <- se[ok]
-  if (length(y) == 0) return(tibble(est = NA_real_, se = NA_real_, n = 0))
-  w <- 1 / se^2
-  fe <- sum(w * y) / sum(w)
-  Q <- sum(w * (y - fe)^2)
-  k <- length(y)
-  den <- sum(w) - sum(w^2) / sum(w)
-  tau2 <- if (k > 1 && den > 0) max(0, (Q - (k - 1)) / den) else 0
-  wr <- 1 / (se^2 + tau2)
-  tibble(est = sum(wr * y) / sum(wr), se = sqrt(1 / sum(wr)), n = k)
+df_cc <- df_contrasts |> drop_na(all_of(full_raw))
+asjp_center <- mean(df_cc$asjp_dist, na.rm = TRUE)
+df_cc <- df_cc |>
+  mutate(
+    vocab_c     = if_else(vocab_type == "expressive", 0.5, -0.5),
+    typical_c   = if_else(infant_typical, 0.5, -0.5),
+    proc_c      = if_else(assessment_procedure == "direct", 0.5, -0.5),
+    asjp_miss_c = if_else(is.na(asjp_dist), 0.5, -0.5),
+    asjp_c      = if_else(is.na(asjp_dist), 0, asjp_dist - asjp_center)
+  )
+beta_m <- as.matrix(fits$full$draws("beta", format = "draws_matrix"))
+tau_m  <- as.matrix(fits$full$draws("tau", format = "draws_matrix"))
+mu_m   <- as.matrix(fits$full$draws("mu_d", format = "draws_matrix"))
+
+pool_adj <- function(trt, ref, sign = 1, n_draw = 4000) {
+  d <- df_cc |> filter(arm_trt == trt, arm_ref == ref)
+  if (!nrow(d)) return(rep(NA_real_, n_draw))
+  X <- as.matrix(d[, c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")])
+  y <- d$y * sign
+  se2 <- d$se_y^2
+  P <- ncol(X)
+  idx <- sample.int(nrow(beta_m), n_draw, replace = TRUE)
+  map_dbl(idx, \(s) {
+    xb <- rep(0, nrow(d))
+    if (trt > 1)
+      xb <- xb + as.vector(X %*% as.numeric(beta_m[s, paste0("beta[", trt - 1, ",", seq_len(P), "]")]))
+    if (ref > 1)
+      xb <- xb - as.vector(X %*% as.numeric(beta_m[s, paste0("beta[", ref - 1, ",", seq_len(P), "]")]))
+    tk <- if (ref == 1) as.numeric(tau_m[s, trt - 1])
+          else sqrt(as.numeric(tau_m[s, trt - 1])^2 + as.numeric(tau_m[s, ref - 1])^2)
+    w <- 1 / (se2 + tk^2)
+    sum(w * (y - xb)) / sum(w)
+  })
 }
 
-node_split_one <- function(name, dir_trt, dir_ref, path) {
-  d <- df_contrasts |> filter(arm_trt == dir_trt, arm_ref == dir_ref)
-  pd <- pool_dl(d$y, d$se_y)
+node_split_one <- function(name, dir_trt, dir_ref, path, net) {
+  dir <- pool_adj(dir_trt, dir_ref)
   parts <- map(path, \(pr) {
-    dat <- df_contrasts |> filter(arm_trt == pr[1], arm_ref == pr[2])
-    pool_dl(dat$y * pr[3], dat$se_y)
+    list(n = df_cc |> filter(arm_trt == pr[1], arm_ref == pr[2]) |> nrow(),
+         draws = pool_adj(pr[1], pr[2], pr[3]))
   })
-  ind <- sum(map_dbl(parts, "est"))
-  ind_se <- sqrt(sum(map_dbl(parts, "se")^2))
-  inc <- pd$est - ind
-  inc_se <- sqrt(pd$se^2 + ind_se^2)
-  z <- inc / inc_se
+  ind <- reduce(map(parts, "draws"), `+`)
+  inc <- dir - ind
+  net <- sample(as.numeric(net), length(dir), replace = TRUE)
+  inc_nma <- net - dir
+  h_dir <- hdi95(dir)
+  h_ind <- hdi95(ind)
+  h_inc <- hdi95(inc)
+  h_net <- hdi95(net)
+  h_nma <- hdi95(inc_nma)
   tibble(
     comparison = name,
-    n_direct = pd$n,
+    n_direct = df_cc |> filter(arm_trt == dir_trt, arm_ref == dir_ref) |> nrow(),
     n_indirect = sum(map_int(parts, "n")),
-    direct = pd$est,
-    indirect = ind,
-    inconsistency = inc,
-    se = inc_se,
-    z = z,
-    p = 2 * pnorm(-abs(z))
+    direct = median(dir),
+    direct_ci.lb = h_dir[1],
+    direct_ci.ub = h_dir[2],
+    indirect = median(ind),
+    indirect_ci.lb = h_ind[1],
+    indirect_ci.ub = h_ind[2],
+    inconsistency = median(inc),
+    ci.lb = h_inc[1],
+    ci.ub = h_inc[2],
+    p = 2 * min(mean(inc > 0, na.rm = TRUE), mean(inc < 0, na.rm = TRUE)),
+    network = median(net),
+    network_ci.lb = h_net[1],
+    network_ci.ub = h_net[2],
+    inc_network = median(inc_nma),
+    inc_network_ci.lb = h_nma[1],
+    inc_network_ci.ub = h_nma[2]
   )
 }
 ```
@@ -469,10 +506,10 @@ print(conv, n = Inf)
 ```
 
 ```{r}
-# RQ1: base model, three mono vs bi comparisons
-mu <- as.matrix(fits$base$draws("mu_d", format = "draws_matrix"))
-tau <- as.matrix(fits$base$draws("tau", format = "draws_matrix"))
-s2 <- df_contrasts |>
+# RQ1: full model at X=0, three mono vs bi comparisons
+mu <- as.matrix(fits$full$draws("mu_d", format = "draws_matrix"))
+tau <- as.matrix(fits$full$draws("tau", format = "draws_matrix"))
+s2 <- df_cc |>
   filter(arm_ref == 1) |>
   group_by(k = arm_trt - 1) |>
   summarise(s2 = median(se_y^2), .groups = "drop")
@@ -501,13 +538,13 @@ print(i2, n = Inf)
 ```
 
 ```{r}
-# Bucher node-splitting: direct DL pool vs the complementary path
+# Node-splitting on the full model (contrasts residualised at X=0)
 ns <- bind_rows(
-  node_split_one("mono vs single-language", 2, 1, list(c(3, 1, 1), c(3, 2, -1))),
-  node_split_one("mono vs total",           3, 1, list(c(3, 2, 1), c(2, 1, 1))),
-  node_split_one("mono vs conceptual",      4, 1, list(c(4, 2, 1), c(2, 1, 1)))
-)
-cat("Node-splitting (Bucher): direct vs indirect; p tests inconsistency = 0\n")
+  node_split_one("mono vs single-language", 2, 1, list(c(3, 1, 1), c(3, 2, -1)), mu_m[, 1]),
+  node_split_one("mono vs total",           3, 1, list(c(3, 2, 1), c(2, 1, 1)), mu_m[, 2]),
+  node_split_one("mono vs conceptual",      4, 1, list(c(4, 2, 1), c(2, 1, 1)), mu_m[, 3])
+) |> write_csv(here("outputs/node_split.csv"))
+cat("Node-splitting (full model): Bucher inconsistency = direct − indirect; inc_network = μ_d − direct; 95% HDIs\n")
 print(ns, n = Inf)
 ```
 
@@ -518,11 +555,14 @@ rq24_specs <- list(
   `2` = list(var = "vocab_type",           label = "measure (expressive − receptive)"),
   `3` = list(var = "infant_typical",       label = "typical development"),
   `4` = list(var = "assessment_procedure", label = "instrument (direct − indirect)"),
-  `5` = list(var = "asjp_dist",            label = "ASJP distance")
+  `5` = list(var = "asjp_dist",            label = "ASJP distance"),
+  `6` = list(var = "asjp_miss",            label = "ASJP missing (various)")
 )
 
 n_sub <- imap(rq24_specs, \(sp, p) {
   d <- df_contrasts |> drop_na(all_of(full_raw))
+  if (sp$var == "asjp_dist") d <- d |> drop_na(asjp_dist)
+  if (sp$var == "asjp_miss") d <- d |> mutate(asjp_miss = is.na(asjp_dist))
   if (is.numeric(d[[sp$var]])) {
     tibble(covariate = sp$label, subgroup = "all", n_studies = n_distinct(d$short_cite))
   } else {

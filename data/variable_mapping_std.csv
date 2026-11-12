@@ -16,10 +16,8 @@ assessment_tool,(short form) British Picture Vocabulary Scale,BPVS
 assessment_tool,**Diagnostische Toets Tweetaligheid,DTT
 assessment_tool,Ad-hoc task,Ad-hoc task
 assessment_tool,Albanian vocabulary test,Ad-hoc task
-assessment_tool,American English CDI,CDI
 assessment_tool,"American English MCDI, French Canadian adapted MCDI",CDI
 assessment_tool,"American English MCDI, French Canadian/Hebrew/Italian/Turkish adapted MCDI",CDI
-assessment_tool,American English version Web-CDI,CDI
 assessment_tool,Arabic Picture Vocabulary Test,PPVT
 assessment_tool,Australian English Communicative Inventory OZI,CDI
 assessment_tool,BESA,BESA
@@ -32,7 +30,6 @@ assessment_tool,BPVS III,BPVS
 assessment_tool,BPVS-II,BPVS
 assessment_tool,BPVS-III,BPVS
 assessment_tool,BPVSII,BPVS
-assessment_tool,Body part naming NEPSY,NEPSY
 assessment_tool,British Picture Vocabulary Scales (BPVS),BPVS
 assessment_tool,CCT,CCT
 assessment_tool,CDI,CDI
@@ -106,8 +103,6 @@ assessment_tool,LITMUS CLT (Hebrew),CLT
 assessment_tool,LITMUS CLT (Russian),CLT
 assessment_tool,LexExp CLT-LB,CLT
 assessment_tool,LexP subtest ELO-L,ELO
-assessment_tool,LexR subtest ELO-L,ELO
-assessment_tool,LexRec CLT-LB,CLT
 assessment_tool,MB-CDI,CDI
 assessment_tool,MB-CDI  Words and Sentences (toddler long form),CDI
 assessment_tool,MB-CDI (English),CDI
@@ -120,23 +115,18 @@ assessment_tool,MB-CDI:Words and Gestures,CDI
 assessment_tool,MB-IDHC: Palabras y Enunciados,CDI
 assessment_tool,MC-CDI (long form),CDI
 assessment_tool,MCDI,CDI
-assessment_tool,MCDI  (Words and Sentences),CDI
-assessment_tool,MCDI (Words and Sentences),CDI
 assessment_tool,MCDI Words & Sentences (short form),CDI
 assessment_tool,MCDI Words and Sentences,CDI
 assessment_tool,MCDI Words and gestures,CDI
 assessment_tool,Mandarin MCDI,CDI
 assessment_tool,Mandarin PPVT-4,PPVT
-assessment_tool,Mandarin PPVT-5,PPVT
 assessment_tool,Mandarin PPVT-III (not standardized),PPVT
-assessment_tool,Maori PPVT-III,PPVT
 assessment_tool,N-CDI (Dutch version),CDI
 assessment_tool,N-EEL,NEEL
 assessment_tool,NIH Toolbox Picture Vocabulary Task,NIHT PVT
 assessment_tool,NIHT PVT,NIHT PVT
 assessment_tool,Naming BVL 4-12,BVL
 assessment_tool,Naming BVL_RU,BVL
-assessment_tool,Naming task (73 item),Ad-hoc task
 assessment_tool,New Zealand Cantonese CDI,CDI
 assessment_tool,New Zealand Mandarin CDI,CDI
 assessment_tool,Noun sub-test (PDSS) Patholinguistische Diagnostik bei Sprachentwicklungsstörungen,PDSS
@@ -179,7 +169,6 @@ assessment_tool,Picture naming task,Ad-hoc task
 assessment_tool,Picture naming test,Ad-hoc task
 assessment_tool,Polish CLT (Cross-linguistic Lexical Task),CLT
 assessment_tool,QUILS,QUILS
-assessment_tool,Québec French adaptation Web-CDI,CDI
 assessment_tool,ROWPVT,ROWPVT
 assessment_tool,ROWPVT - 4 (Receptive One-Word Picture Vocabulary Test Spanish Bilingual Edition),ROWPVT
 assessment_tool,ROWPVT-4,ROWPVT
@@ -190,14 +179,12 @@ assessment_tool,SCDI-III (Swedish version of MB- CDI),CDI
 assessment_tool,SEB – EOWPVT,EOWPVT
 assessment_tool,SETK,SETK
 assessment_tool,SETK-2,SETK
-assessment_tool,Samoan PPVT-III,PPVT
 assessment_tool,Set 5-10 Spracherhebungstest für Kinder im Alter zwischen 5 und 10 Jahren;,Spracherhebungstest
 assessment_tool,Spanish CDI,CDI
 assessment_tool,Spanish CDI Toddlers Form,CDI
 assessment_tool,Spanish EOWPVT-4,EOWPVT
 assessment_tool,Spanish EOWPVT-IV,EOWPVT
 assessment_tool,Spanish ROWPVT,ROWPVT
-assessment_tool,"Spanish version of the MCDI, translated American english and Japanese CDI for Chinese- and Vietnamese-speaking bilingual children, for the others translated English MCDI",CDI
 assessment_tool,"Spanish, English, French, Italian CDI",CDI
 assessment_tool,T-TOS test battery,T-TOS
 assessment_tool,TILDA,TILDA
@@ -233,7 +220,6 @@ assessment_tool,ZNO,ZNO
 assessment_tool,[Dutch] Toets Tweetaligheid (The Turkish and Dutch receptive vocabulary tests were part of the Test for Bilingualism),DTT
 assessment_tool,[Turkish] Toets Tweetaligheid (The Turkish and Dutch receptive vocabulary tests were part of the Test for Bilingualism),DTT
 assessment_tool,adapted Mandarin MCDI,CDI
-assessment_tool,comprehension post-test,Ad-hoc task
 assessment_tool,concept words receptive vocabulary subtest (Diagnostische Toets Tweetaligheid ),DTT
 assessment_tool,lexical comprehension task BVL 4-12,BVL
 assessment_tool,lexical comprehension task BVL_RU,BVL
@@ -248,8 +234,6 @@ assessment_tool,translated Urdu PPVT,PPVT
 assessment_tool,word development subtest of STTP (Schlichting Tests for Language Production),STTP
 assessment_tool,NA,
 bilingual_type,"""Italian before 1;6""",mixed
-bilingual_type,"""balanced bilinguals""",not reported
-bilingual_type,"""unbalanced bilinguals""",not reported
 bilingual_type,28 Sequential; 3 Simultaneous,mixed
 bilingual_type,29 Sequential; 3 Simultaneous,mixed
 bilingual_type,ELL,sequential
@@ -270,7 +254,6 @@ bilingual_type,"Sequential (HL Turkish, Dutch exposure from preschool)",sequenti
 bilingual_type,"Sequential (L1 at home, L2 at school)",sequential
 bilingual_type,Sequential (Sequential (Age of First Exposure: m=2.24),sequential
 bilingual_type,Sequential (after 3.39 years),sequential
-bilingual_type,"Sequential bilingualism: L1 Turkish, L2 Dutch (systematic exposure to Dutch from school entry, instruction only in Dutch).",sequential
 bilingual_type,"Sequential bilingualism: Turkish as L1 (home), Dutch as L2 (school, immersion from grade 1); variation in home exposure (mainly Turkish for majority).",sequential
 bilingual_type,"Sequential bilinguals (L1 minority language, L2 Dutch)",sequential
 bilingual_type,"Sequential, Simultaneous",mixed
@@ -281,7 +264,6 @@ bilingual_type,"Sequential:bilinguals acquired their home language first and Dut
 bilingual_type,Simultaneous,simultaneous
 bilingual_type,Simultaneous (2),simultaneous
 bilingual_type,Simultaneous (All the bilingual participants had been exposed to English and Spanish from birth and used both languages when speaking with their bilingual parent/s),simultaneous
-bilingual_type,Simultaneous bilinguals (exposed to both languages from birth),simultaneous
 bilingual_type,Simultaneous: Exposure to L2 M=2.2y (before 3yo),simultaneous
 bilingual_type,Simultaneous: French+English from birth regularly,simultaneous
 bilingual_type,both,mixed
@@ -291,8 +273,6 @@ bilingual_type,"mixed (""The age of onset of exposure to English varied: Eight c
 bilingual_type,"mixed (""The age that parents reported English exposure for their children ranged from birth to 5 years."")",mixed
 bilingual_type,mixed (age of onset to L2 = [0-60]),mixed
 bilingual_type,na,not reported
-bilingual_type,"na (""fully bilingual"")",not reported
-bilingual_type,na (they are exposed to French but only used at school),sequential
 bilingual_type,not reported,not reported
 bilingual_type,sequential,sequential
 bilingual_type,"sequential (""All the bilingual children began to acquire English at the age of four"")",sequential
@@ -307,7 +287,7 @@ bilingual_type,simultaneous (Age of English acquisition – 24.7),simultaneous
 bilingual_type,simultaneous or early sequential bilinguals,mixed
 bilingual_type,"simultaneous, sequential",mixed
 bilingual_type,"“Simultaneous / early bilinguals (L1 from birth, regular L2 English exposure by age 2).”",mixed
-bilingual_type,NA,NA
+bilingual_type,NA,not reported
 country,Argentina,ar
 country,Australia,au
 country,Belgium,be
@@ -322,8 +302,8 @@ country,Germany,de
 country,Germany/USA,"de,us"
 country,Greece,el
 country,Hong Kong,cn
-country,Ireland,ie
 country,Iran,ir
+country,Ireland,ie
 country,Israel,il
 country,Isreael,il
 country,Italy,it
@@ -347,7 +327,6 @@ country,South Korea,ko
 country,Spain,es
 country,Sweden,se
 country,Switzerland,ch
-country,Turkey,tr
 country,UK,gb
 country,US,us
 country,US (Seattle),us
@@ -357,25 +336,21 @@ country,USA,us
 country,United Arab Emirates,ae
 country,Vietnam,vn
 country,isreael,il
-country,na,NA
 country,not reported,not reported
-country,NA,NA
 infant_type,Atypical (DLD),atypical (DLD)
 infant_type,Atypical (Dyslexic),atypical (dyslexia)
 infant_type,Atypical (SLD),atypical (DLD)
 infant_type,Atypical (SLI),atypical (DLD)
-infant_type,Atypical (autism),atypical (ASD)
 infant_type,DLD,atypical (DLD)
 infant_type,SLI,atypical (DLD)
 infant_type,Typical,typical
 infant_type,atypical (DLD),atypical (DLD)
 infant_type,"atypical (DLD; "" To be included in the DLD group, children had to be currently receiving speech-language therapy for an oral language disorder (different terminologies accepted: DLD, language disorder/problem/delay, speech delay, dysphasia, speaking difficulty) and to meet at least one of the following two criteria: 1) to have obtained a standard score below the cut-off (defined by the test) on a non-word repetition (NWR) task (see 2.3.2); 2) to have obtained a standard score below the cut-off on a sentence repetition (SR) task (see 2.3.2).""",atypical (DLD)
 infant_type,mixed,mixed
-infant_type,"parental concern regarding language development (""PEDS expressive speech and language: “Do you have any concerns about how your child talks and makes speech sounds?” (yes, a little, no) PEDS receptive language: “Do you have any concerns about how your child understands what you say to him?” (yes, a little, no)"")",atypical (parental concern)
+infant_type,"parental concern regarding language development (""PEDS expressive speech and language: “Do you have any concerns about how your child talks and makes speech sounds?” (yes, a little, no) PEDS receptive language: “Do you have any concerns about how your child understands what you say to him?” (yes, a little, no)"")",atypical (DLD)
 infant_type,typical,typical
 infant_type,typical (7/20 were French ELL),typical
 infant_type,typical (assumed),typical
-infant_type,NA,NA
 is_plurilingual,mixed,mixed
 is_plurilingual,na,NA
 is_plurilingual,no,no
@@ -387,7 +362,6 @@ is_plurilingual,"yes (""Fifteen children had some additional German exposure fro
 is_plurilingual,yes (2),mixed
 is_plurilingual,"yes (5) with exposure ranging from 1% to 7% (M=4%, SD =3%)",mixed
 is_plurilingual,yes (New Zealand English),mixed
-is_plurilingual,yes (less than 10% of exposure),mixed
 is_plurilingual,yes (n=1 turkish/kurdish),mixed
 is_plurilingual,yes (n=13),mixed
 is_plurilingual,yes (only 2 exposed to English),mixed
@@ -401,13 +375,11 @@ lang,Cantonese/English,"yue,eng"
 lang,Catalan,cat
 lang,Catalan/Spanish,"cat,spa"
 lang,Chinese,zho
-lang,Czech,ces
 lang,Dutch,nld
 lang,English,eng
 lang,English/French,"eng,fra"
 lang,English/Spanish,"eng,spa"
 lang,Farsi,pes
-lang,Persian,pes
 lang,Finnish,fin
 lang,French,fra
 lang,French/English,"fra,eng"
@@ -424,17 +396,18 @@ lang,Korean,kor
 lang,Lebanese Arabic,ara
 lang,Luxembourgish,ltz
 lang,Maltese,mlt
-lang,Mazandarani,mzn
 lang,Mandarin,cmn
 lang,Mandarin Chinese,cmn
 lang,Mandarin/Cantonese,"cmn,yue"
 lang,Mandarin/English,"cmn,eng"
 lang,Maori,mri
+lang,Mazandarani,mzn
 lang,Nigerian English,eng
 lang,Norwegian,nob
+lang,Persian,pes
 lang,Polish,pol
 lang,Portuguese,por
-lang,Quechua/Spanish,"que,spa"
+lang,Quechua,que
 lang,Romanian,ron
 lang,Russian,rus
 lang,Samoan,smo
@@ -458,15 +431,10 @@ lang,NA,NA
 vocab_units,Proportion (standard scores),standard score
 vocab_units,"Rasch-based W scores (developmental standard scores; 500 ≈ age 10 mean), not raw scores or percentages",standard score
 vocab_units,centile,percentile
-vocab_units,na,NA
 vocab_units,na (ideally should be standardized looking at the effect sizes),standard score
 vocab_units,percentile,percentile
-vocab_units,percentile (calculated on English CDI norms),percentile
-vocab_units,percentile (calculated on Spanish CDI norms),percentile
 vocab_units,proportion,proportion
 vocab_units,proportion (%),proportion
-vocab_units,proportion (392 item),proportion
-vocab_units,proportion (427 item),proportion
 vocab_units,proportion (monolingual English normative data),standard score
 vocab_units,proportion (standard score),standard score
 vocab_units,proportion (standard),standard score
@@ -486,4 +454,3 @@ vocab_units,standard score,standard score
 vocab_units,standardized,standard score
 vocab_units,standardized (with English normative data),standard score
 vocab_units,z-score,standard score
-vocab_units,NA,NA
