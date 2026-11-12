@@ -51,15 +51,7 @@ data {
   array[N_obs] int<lower=1, upper=N_ppt>   ppt_ref_id;
   array[N_obs] int<lower=0, upper=1>       paired;
 
-  matrix[N_obs, P] X;    // no intercept column; missing ASJP cells are 0
-
-  int<lower=0, upper=1> has_asjp;
-  int<lower=0, upper=P> asjp_col;
-  int<lower=0> N_asjp_obs;
-  int<lower=0> N_asjp_miss;
-  array[N_asjp_obs] int<lower=1, upper=N_obs> asjp_obs_idx;
-  array[N_asjp_miss] int<lower=1, upper=N_obs> asjp_miss_idx;
-  vector[N_asjp_obs] asjp_obs;
+  matrix[N_obs, P] X;    // no intercept column; missing ASJP filled with 0 (centred mean)
 }
 
 parameters {
@@ -68,9 +60,6 @@ parameters {
 
   // Arm-differential meta-regression slopes (bilingual arms only; mono = 0)
   matrix[K-1, P] beta;
-
-  array[has_asjp] real<lower=0> sigma_asjp;
-  vector[N_asjp_miss] asjp_imp;
 
   // Between-study heterogeneity (independent per bilingual arm)
   vector<lower=0>[K-1] tau;
@@ -93,12 +82,6 @@ parameters {
 transformed parameters {
   matrix[N_study, K-1] delta_study;
   matrix[N_ppt, K-1]   u_ppt;
-  matrix[N_obs, P] X_use = X;
-
-  if (has_asjp) {
-    for (j in 1:N_asjp_miss)
-      X_use[asjp_miss_idx[j], asjp_col] = asjp_imp[j];
-  }
 
   for (k in 1:(K-1))
     delta_study[, k] = tau[k] * z_study[, k];
@@ -131,12 +114,6 @@ model {
   L_Omega ~ lkj_corr_cholesky(2);
   v_ppt   ~ normal(0, sigma_ppt);
 
-  if (has_asjp) {
-    sigma_asjp[1] ~ normal(0, 1);
-    asjp_obs ~ normal(0, sigma_asjp[1]);
-    asjp_imp ~ normal(0, sigma_asjp[1]);
-  }
-
   // Likelihood
   for (i in 1:N_obs) {
     real eta =
@@ -147,7 +124,7 @@ model {
       row_vector[P] b_trt = beta_of_arm(arm_trt[i], beta, P);
       row_vector[P] b_ref = beta_of_arm(arm_ref[i], beta, P);
       
-      eta += (b_trt - b_ref) * X_use[i]';
+      eta += (b_trt - b_ref) * X[i]';
     }
     
     // real sigma_add = paired[i] == 1 ? sigma_add_paired : sigma_add_unpaired;

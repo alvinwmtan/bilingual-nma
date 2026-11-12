@@ -12,7 +12,7 @@ df_contrasts <- readRDS(here("outputs", "df_contrasts.rds"))
 ```
 
 # Construction
-Binary covariates are coded (−0.5, +0.5); ASJP is centred on observed distances. Missing ASJP (language “various”) is kept: those rows get `asjp_miss_c` = +0.5 and a latent `asjp_c` with prior \(N(0,\sigma_{\mathrm{asjp}})\). Then \(\mu_d\) is a grand-mean effect, comparable to the base model.
+Binary covariates are coded (−0.5, +0.5); ASJP is centred on observed distances. Missing ASJP (language “various”) is filled with 0, the mean of the centred distances.
 
 ```{r}
 raw_vars <- c(
@@ -30,7 +30,6 @@ add_coded <- function(df) {
       vocab_c     = if_else(vocab_type == "expressive", 0.5, -0.5),
       typical_c   = if_else(infant_typical, 0.5, -0.5),
       proc_c      = if_else(assessment_procedure == "direct", 0.5, -0.5),
-      asjp_miss_c = if_else(is.na(asjp_dist), 0.5, -0.5),
       asjp_c      = if_else(is.na(asjp_dist), 0, asjp_dist - asjp_center)
     )
 }
@@ -40,7 +39,7 @@ build_stan_data <- function(df_contrasts, formula = ~ 1) {
   if (length(covars) > 0)
     df_contrasts <- add_coded(df_contrasts)
   raw_needed <- unique(map_chr(covars, \(v) if (v %in% names(raw_vars)) raw_vars[[v]] else v))
-  raw_needed <- setdiff(raw_needed, c("asjp_dist", "asjp_c", "asjp_miss_c"))
+  raw_needed <- setdiff(raw_needed, c("asjp_dist", "asjp_c"))
   if (length(raw_needed) > 0)
     df_contrasts <- df_contrasts |> drop_na(all_of(raw_needed))
 
@@ -63,20 +62,6 @@ build_stan_data <- function(df_contrasts, formula = ~ 1) {
     stop("Mismatch in nrow between df_contrasts and X")
   }
 
-  has_asjp <- "asjp_c" %in% colnames(X)
-  if (has_asjp) {
-    miss <- is.na(df_contrasts$asjp_dist)
-    asjp_col <- match("asjp_c", colnames(X))
-    asjp_obs_idx <- which(!miss)
-    asjp_miss_idx <- which(miss)
-    asjp_obs <- df_contrasts$asjp_c[!miss]
-  } else {
-    asjp_col <- 0L
-    asjp_obs_idx <- integer()
-    asjp_miss_idx <- integer()
-    asjp_obs <- numeric()
-  }
-  
   N_ppt <- max(c(df_contrasts$ppt_trt_id, df_contrasts$ppt_ref_id))
   
   list(
@@ -96,14 +81,7 @@ build_stan_data <- function(df_contrasts, formula = ~ 1) {
     ppt_ref_id = df_contrasts$ppt_ref_id,
     paired     = df_contrasts$paired,
     
-    X          = X,
-    has_asjp   = as.integer(has_asjp),
-    asjp_col   = as.integer(asjp_col),
-    N_asjp_obs = length(asjp_obs_idx),
-    N_asjp_miss = length(asjp_miss_idx),
-    asjp_obs_idx = asjp_obs_idx,
-    asjp_miss_idx = asjp_miss_idx,
-    asjp_obs   = asjp_obs
+    X          = X
   )
 }
 
@@ -119,7 +97,7 @@ model_specs <- list(
   # infant_typical        = ~ typical_c,
   # assessment_procedure  = ~ proc_c,
   # asjp_dist             = ~ asjp_c,
-  full                  = ~ age_c + vocab_c + typical_c + proc_c + asjp_c + asjp_miss_c
+  full                  = ~ age_c + vocab_c + typical_c + proc_c + asjp_c
 )
 
 fit_dir <- here("outputs", "stan")

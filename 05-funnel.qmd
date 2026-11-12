@@ -36,14 +36,12 @@ df_cc <- df_cc |>
     vocab_c     = if_else(vocab_type == "expressive", 0.5, -0.5),
     typical_c   = if_else(infant_typical, 0.5, -0.5),
     proc_c      = if_else(assessment_procedure == "direct", 0.5, -0.5),
-    asjp_miss_c = if_else(is.na(asjp_dist), 0.5, -0.5),
     asjp_c      = if_else(is.na(asjp_dist), 0, asjp_dist - asjp_center),
     comparison  = factor(arm_lab[as.character(arm_trt)],
                          levels = unname(arm_lab))
   )
 
-X <- as.matrix(df_cc[, c("age_c", "vocab_c", "typical_c", "proc_c",
-                         "asjp_c", "asjp_miss_c")])
+X <- as.matrix(df_cc[, c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")])
 P <- ncol(X)
 beta_bar <- colMeans(as.matrix(fits$full$draws("beta", format = "draws_matrix")))
 tau_bar  <- colMeans(as.matrix(fits$full$draws("tau", format = "draws_matrix")))

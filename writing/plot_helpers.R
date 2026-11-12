@@ -44,8 +44,8 @@ print_ns <- function(df, term) {
 }
 
 make_grid <- function(newdata = NULL) {
-  coded <- c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")
-  x <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)
+  coded <- c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")
+  x <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)
   if (is.null(newdata)) return(x)
   nd <- as_tibble(newdata)
   x <- x[rep(1, nrow(nd)), ]
@@ -66,14 +66,13 @@ make_grid <- function(newdata = NULL) {
   if ("asjp_dist" %in% names(nd))
     x$asjp_c <- nd$asjp_dist - mean(df_contrasts$asjp_dist, na.rm = TRUE)
   if ("asjp_c" %in% names(nd)) x$asjp_c <- nd$asjp_c
-  if ("asjp_miss_c" %in% names(nd)) x$asjp_miss_c <- nd$asjp_miss_c
   bind_cols(nd |> select(-any_of(coded)), x)
 }
 
 arm_draws <- function(fit, x) {
   mu <- as.matrix(fit$draws("mu_d", format = "draws_matrix"))
   abs_d <- cbind(0, mu)
-  X <- unlist(x[c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")])
+  X <- unlist(x[c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")])
   beta <- as.matrix(fit$draws("beta", format = "draws_matrix"))
   for (k in 1:3) {
     bk <- beta[, paste0("beta[", k, ",", seq_along(X), "]"), drop = FALSE]
@@ -195,7 +194,7 @@ plot_moderator <- function(mod_full, xvar, xlab, tag = NULL) {
   }
   grid <- make_grid(tibble(!!xvar := xs))
   band <- model_band(mod_full,
-                     formula(~ age_c + vocab_c + typical_c + proc_c + asjp_c + asjp_miss_c),
+                     formula(~ age_c + vocab_c + typical_c + proc_c + asjp_c),
                      grid, pairs_mono)
   
   keys <- map_chr(pairs_mono, \(p) paste(p$trt, p$ref))

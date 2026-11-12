@@ -56,8 +56,7 @@ covar_lab <- c(
   `2` = "Vocab domain",
   `3` = "Typical devt",
   `4` = "Inst type",
-  `5` = "ASJP dist",
-  `6` = "ASJP missing"
+  `5` = "ASJP dist"
 )
 
 p_res <- df_res_all |>
@@ -131,7 +130,7 @@ p_beta
 Lines and bands are from the **full** model at the grand mean (other covariates held at 0 under ±0.5 / centred coding). Points use all rows except the ASJP panel, which shows observed distances only. Categorical predictors dodge by vocab measure so the mean+CI sits on that measure’s points. The strip above each panel is a histogram of bilingual–bilingual contrasts at those \(x\)-values. Main panels are monolingual vs bilingual; bilingual vs bilingual are plotted separately.
 
 ```{r}
-full_f <- ~ age_c + vocab_c + typical_c + proc_c + asjp_c + asjp_miss_c
+full_f <- ~ age_c + vocab_c + typical_c + proc_c + asjp_c
 full_raw <- c("age_c", "vocab_type", "infant_typical", "assessment_procedure")
 
 moderator_specs <- list(
@@ -146,12 +145,12 @@ make_grid <- function(df, xvar) {
   asjp_center <- mean(df$asjp_dist, na.rm = TRUE)
   if (is.numeric(df[[xvar]])) {
     xs <- seq(min(df[[xvar]]), max(df[[xvar]]), length.out = 80)
-    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)[rep(1, 80), ]
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, 80), ]
     if (xvar == "age_c") grid$age_c <- xs
     if (xvar == "asjp_dist") grid$asjp_c <- xs - asjp_center
   } else {
     xs <- sort(unique(df[[xvar]]))
-    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0, asjp_miss_c = 0)[rep(1, length(xs)), ]
+    grid <- tibble(age_c = 0, vocab_c = 0, typical_c = 0, proc_c = 0, asjp_c = 0)[rep(1, length(xs)), ]
     if (xvar == "vocab_type")
       grid$vocab_c <- if_else(as.character(xs) == "expressive", 0.5, -0.5)
     if (xvar == "infant_typical")
@@ -417,7 +416,6 @@ df_cc <- df_cc |>
     vocab_c     = if_else(vocab_type == "expressive", 0.5, -0.5),
     typical_c   = if_else(infant_typical, 0.5, -0.5),
     proc_c      = if_else(assessment_procedure == "direct", 0.5, -0.5),
-    asjp_miss_c = if_else(is.na(asjp_dist), 0.5, -0.5),
     asjp_c      = if_else(is.na(asjp_dist), 0, asjp_dist - asjp_center)
   )
 beta_m <- as.matrix(fits$full$draws("beta", format = "draws_matrix"))
@@ -427,7 +425,7 @@ mu_m   <- as.matrix(fits$full$draws("mu_d", format = "draws_matrix"))
 pool_adj <- function(trt, ref, sign = 1, n_draw = 4000) {
   d <- df_cc |> filter(arm_trt == trt, arm_ref == ref)
   if (!nrow(d)) return(rep(NA_real_, n_draw))
-  X <- as.matrix(d[, c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c", "asjp_miss_c")])
+  X <- as.matrix(d[, c("age_c", "vocab_c", "typical_c", "proc_c", "asjp_c")])
   y <- d$y * sign
   se2 <- d$se_y^2
   P <- ncol(X)
@@ -555,14 +553,12 @@ rq24_specs <- list(
   `2` = list(var = "vocab_type",           label = "measure (expressive − receptive)"),
   `3` = list(var = "infant_typical",       label = "typical development"),
   `4` = list(var = "assessment_procedure", label = "instrument (direct − indirect)"),
-  `5` = list(var = "asjp_dist",            label = "ASJP distance"),
-  `6` = list(var = "asjp_miss",            label = "ASJP missing (various)")
+  `5` = list(var = "asjp_dist",            label = "ASJP distance")
 )
 
 n_sub <- imap(rq24_specs, \(sp, p) {
   d <- df_contrasts |> drop_na(all_of(full_raw))
   if (sp$var == "asjp_dist") d <- d |> drop_na(asjp_dist)
-  if (sp$var == "asjp_miss") d <- d |> mutate(asjp_miss = is.na(asjp_dist))
   if (is.numeric(d[[sp$var]])) {
     tibble(covariate = sp$label, subgroup = "all", n_studies = n_distinct(d$short_cite))
   } else {
