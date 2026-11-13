@@ -18,6 +18,15 @@ df_data_f <- read_sheet(ss, "Federica")
 df_main <- read_sheet(ss, "main")
 df_paired_wide <- read_sheet(ss, "paired")
 
+dir.create(here("data", "raw_data"), recursive = TRUE, showWarnings = FALSE)
+write_csv(df_data_a, here("data", "raw_data", "data_raw_awmt.csv"))
+write_csv(df_data_g, here("data", "raw_data", "data_raw_gf.csv"))
+write_csv(df_data_f, here("data", "raw_data", "data_raw_fm.csv"))
+write_csv(df_main, here("data", "raw_data", "data_raw_main.csv"))
+write_csv(df_paired_wide, here("data", "raw_data", "data_raw_paired.csv"))
+```
+
+```{r}
 as_chr1 <- function(x) {
   if (!is.list(x)) return(as.character(x))
   map_chr(x, \(y) {
