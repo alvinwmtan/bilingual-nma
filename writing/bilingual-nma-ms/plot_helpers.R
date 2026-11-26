@@ -289,3 +289,162 @@ plot_moderator <- function(mod_full, xvar, xlab, tag = NULL) {
   
   p_hist / p + plot_layout(heights = c(0.22, 1), axes = "collect_x", tag_level = "new")
 }
+
+plot_prisma <- function(n_database, n_duplicates, n_screened, n_records_excluded,
+                        n_sought, n_notretrieved, n_assessed, excl,
+                        n_studies, n_obs, n_contrasts) {
+  purple <- unname(bivoc_scale["conceptual"])
+  ink <- "#1c1c1c"
+  wash <- "#f0e6f8"
+  nlab <- function(x) scales::comma(x)
+  item <- function(title, n) paste0(title, " (n = ", nlab(n), ")")
+  rounded_rect <- function(xmin, xmax, ymin, ymax, r, gid, n = 12) {
+    r <- min(r, (xmax - xmin) / 2, (ymax - ymin) / 2)
+    arc <- function(cx, cy, a0, a1) {
+      th <- seq(a0, a1, length.out = n)
+      tibble(x = cx + r * cos(th), y = cy + r * sin(th))
+    }
+    bind_rows(
+      arc(xmax - r, ymax - r, 0, pi / 2),
+      arc(xmin + r, ymax - r, pi / 2, pi),
+      arc(xmin + r, ymin + r, pi, 3 * pi / 2),
+      arc(xmax - r, ymin + r, 3 * pi / 2, 2 * pi)
+    ) |> mutate(gid = gid)
+  }
+
+  rail_w <- 0.42
+  rail <- c(0.04, 0.04 + rail_w)
+  main <- c(0.64, 3.72)
+  side <- c(4.00, 7.12)
+  mid <- mean(main)
+  step <- 0.118
+  pad_x <- 0.12
+  indent <- 0.18
+  gap <- 0.13
+  corner <- 0.10
+
+  lines <- bind_rows(
+    tribble(
+      ~box, ~text, ~sub,
+      "id", "Records identified from:", FALSE,
+      "id", item("Databases", n_database), TRUE,
+      "dup", "Records removed before screening:", FALSE,
+      "dup", item("Duplicate records", n_duplicates), TRUE,
+      "scr", item("Records screened", n_screened), FALSE,
+      "ex0", item("Records excluded", n_records_excluded), FALSE,
+      "sought", item("Reports sought for retrieval", n_sought), FALSE,
+      "miss", item("Reports not retrieved", n_notretrieved), FALSE,
+      "assess", item("Reports assessed for eligibility", n_assessed), FALSE
+    ),
+    tibble(box = "ft", text = item("Reports excluded", sum(excl$n)), sub = FALSE),
+    excl |> mutate(box = "ft", text = item(reason, n), sub = TRUE, .keep = "none"),
+    tribble(
+      ~box, ~text, ~sub,
+      "incl", item("Reports included in review", n_studies), FALSE,
+      "incl", item("Observations included in review", n_obs), TRUE,
+      "incl", item("Pairwise comparisons included in review", n_contrasts), TRUE
+    )
+  )
+
+  h_of <- function(box, min_h = 0.38) {
+    k <- sum(lines$box == box)
+    max(min_h, k * step + 0.16)
+  }
+  id_h <- max(h_of("id"), 0.82)
+  scr_h <- h_of("scr")
+  sought_h <- h_of("sought")
+  ft_h <- h_of("ft", min_h = 0.5)
+  assess_h <- h_of("assess")
+  incl_h <- h_of("incl", min_h = 0.52)
+
+  top <- 5
+  banner <- c(top - rail_w, top)
+  id <- c(banner[1] - 0.12 - id_h, banner[1] - 0.12)
+  scr <- c(id[1] - gap - scr_h, id[1] - gap)
+  sought <- c(scr[1] - gap - sought_h, scr[1] - gap)
+  excl_y <- c(sought[1] - gap - ft_h, sought[1] - gap)
+  assess <- c(mean(excl_y) - assess_h / 2, mean(excl_y) + assess_h / 2)
+  incl <- c(excl_y[1] - gap - incl_h, excl_y[1] - gap)
+
+  boxes <- tribble(
+    ~box, ~xmin, ~xmax, ~ymin, ~ymax, ~fill,
+    "id", main[1], main[2], id[1], id[2], "white",
+    "dup", side[1], side[2], id[1], id[2], wash,
+    "scr", main[1], main[2], scr[1], scr[2], "white",
+    "ex0", side[1], side[2], scr[1], scr[2], wash,
+    "sought", main[1], main[2], sought[1], sought[2], "white",
+    "miss", side[1], side[2], sought[1], sought[2], wash,
+    "assess", main[1], main[2], assess[1], assess[2], "white",
+    "ft", side[1], side[2], excl_y[1], excl_y[2], wash,
+    "incl", main[1], main[2], incl[1], incl[2], "white"
+  )
+  labs <- lines |>
+    left_join(boxes, by = "box") |>
+    group_by(box) |>
+    mutate(
+      i = row_number(),
+      y = (ymin + ymax) / 2 + (n() / 2 - i + 0.5) * step,
+      x = xmin + pad_x + if_else(sub, indent, 0)
+    ) |>
+    ungroup()
+
+  phases <- tribble(
+    ~gid, ~ymin, ~ymax, ~label,
+    "Identification", id[1], id[2], "Identification",
+    "Screening", excl_y[1], scr[2], "Screening",
+    "Included", incl[1], incl[2], "Included"
+  )
+  rounds <- bind_rows(
+    pmap(phases, \(gid, ymin, ymax, label) {
+      rounded_rect(rail[1], rail[2], ymin, ymax, corner, gid)
+    }),
+    rounded_rect(main[1], side[2], banner[1], banner[2], corner, "banner")
+  )
+  arrows <- tribble(
+    ~x, ~xend, ~y, ~yend,
+    main[2], side[1], mean(id), mean(id),
+    main[2], side[1], mean(scr), mean(scr),
+    main[2], side[1], mean(sought), mean(sought),
+    main[2], side[1], mean(assess), mean(assess),
+    mid, mid, id[1], scr[2],
+    mid, mid, scr[1], sought[2],
+    mid, mid, sought[1], assess[2],
+    mid, mid, assess[1], incl[2]
+  )
+
+  ggplot() +
+    geom_polygon(aes(x, y, group = gid), data = rounds, fill = purple, colour = NA) +
+    geom_text(
+      aes(x = mean(rail), y = (ymin + ymax) / 2, label = label),
+      data = phases, angle = 90, colour = "white", fontface = "bold",
+      size = 2.7, family = "Open Sans"
+    ) +
+    annotate(
+      "text", x = mean(c(main[1], side[2])), y = mean(banner),
+      label = "Identification of new studies via databases and registers",
+      colour = "white", fontface = "bold", size = 3.05, family = "Open Sans"
+    ) +
+    geom_rect(
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),
+      data = boxes, colour = purple, linewidth = 0.35
+    ) +
+    scale_fill_identity() +
+    geom_text(
+      aes(x, y, label = text),
+      data = labs, hjust = 0, colour = ink, size = 2.6, family = "Open Sans"
+    ) +
+    geom_segment(
+      aes(x = x, xend = xend, y = y, yend = yend),
+      data = arrows, colour = purple, linewidth = 0.35,
+      arrow = arrow(angle = 22, length = unit(0.07, "in"), type = "closed")
+    ) +
+    coord_fixed(
+      xlim = c(0, side[2] + 0.08), ylim = c(incl[1] - 0.06, banner[2] + 0.06),
+      expand = FALSE, clip = "off"
+    ) +
+    theme_void(base_family = "Open Sans") +
+    theme(
+      plot.margin = margin(4, 6, 4, 4),
+      plot.background = element_rect(fill = "white", colour = NA)
+    )
+}

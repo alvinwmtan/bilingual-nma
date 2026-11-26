@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='518.40pt' height='327.60pt' viewBox='0 0 518.40 327.60'>
+<g class='svglite'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1MTguNDB8MC4wMHwzMjcuNjA='>
+    <rect x='0.00' y='0.00' width='518.40' height='327.60' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1MTguNDB8MC4wMHwzMjcuNjA=)'>
+</g>
+<defs>
+  <clipPath id='cpMC4wMHw1MTguNDB8MC44NnwzMjYuNzQ='>
+    <rect x='0.00' y='0.86' width='518.40' height='325.88' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1MTguNDB8MC44NnwzMjYuNzQ=)'>
+<rect x='0.00' y='0.86' width='518.40' height='325.88' style='stroke-width: 0.00; stroke: none; fill: #FFFFFF;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1MTguNDB8MC4wMHwzMjcuNjA=)'>
+<polygon points='506.77,16.14 506.70,15.14 506.49,14.15 506.13,13.21 505.65,12.32 505.05,11.52 504.34,10.80 503.53,10.20 502.64,9.72 501.70,9.37 500.72,9.15 499.71,9.08 56.24,9.08 55.24,9.15 54.25,9.37 53.31,9.72 52.42,10.20 51.62,10.80 50.90,11.52 50.30,12.32 49.82,13.21 49.47,14.15 49.25,15.14 49.18,16.14 49.18,31.68 49.25,32.68 49.47,33.67 49.82,34.61 50.30,35.49 50.90,36.30 51.62,37.01 52.42,37.62 53.31,38.10 54.25,38.45 55.24,38.67 56.24,38.74 499.71,38.74 500.72,38.67 501.70,38.45 502.64,38.10 503.53,37.62 504.34,37.01 505.05,36.30 505.65,35.49 506.13,34.61 506.49,33.67 506.70,32.68 506.77,31.68 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; fill: #9452C7;' />
+<polygon points='36.47,54.27 36.40,53.27 36.18,52.28 35.83,51.34 35.35,50.46 34.74,49.65 34.03,48.94 33.22,48.33 32.34,47.85 31.40,47.50 30.41,47.28 29.41,47.21 13.87,47.21 12.87,47.28 11.88,47.50 10.94,47.85 10.05,48.33 9.25,48.94 8.53,49.65 7.93,50.46 7.45,51.34 7.10,52.28 6.88,53.27 6.81,54.27 6.81,98.06 6.88,99.06 7.10,100.05 7.45,100.99 7.93,101.87 8.53,102.68 9.25,103.39 10.05,104.00 10.94,104.48 11.88,104.83 12.87,105.05 13.87,105.12 29.41,105.12 30.41,105.05 31.40,104.83 32.34,104.48 33.22,104.00 34.03,103.39 34.74,102.68 35.35,101.87 35.83,100.99 36.18,100.05 36.40,99.06 36.47,98.06 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; fill: #9452C7;' />
+<polygon points='36.47,288.86 36.40,287.86 36.18,286.87 35.83,285.93 35.35,285.04 34.74,284.24 34.03,283.52 33.22,282.92 32.34,282.44 31.40,282.09 30.41,281.87 29.41,281.80 13.87,281.80 12.87,281.87 11.88,282.09 10.94,282.44 10.05,282.92 9.25,283.52 8.53,284.24 7.93,285.04 7.45,285.93 7.10,286.87 6.88,287.86 6.81,288.86 6.81,311.46 6.88,312.46 7.10,313.45 7.45,314.39 7.93,315.28 8.53,316.08 9.25,316.80 10.05,317.40 10.94,317.88 11.88,318.23 12.87,318.45 13.87,318.52 29.41,318.52 30.41,318.45 31.40,318.23 32.34,317.88 33.22,317.40 34.03,316.80 34.74,316.08 35.35,315.28 35.83,314.39 36.18,313.45 36.40,312.46 36.47,311.46 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; fill: #9452C7;' />
+<polygon points='36.47,121.36 36.40,120.35 36.18,119.37 35.83,118.43 35.35,117.54 34.74,116.74 34.03,116.02 33.22,115.42 32.34,114.94 31.40,114.58 30.41,114.37 29.41,114.30 13.87,114.30 12.87,114.37 11.88,114.58 10.94,114.94 10.05,115.42 9.25,116.02 8.53,116.74 7.93,117.54 7.45,118.43 7.10,119.37 6.88,120.35 6.81,121.36 6.81,265.56 6.88,266.56 7.10,267.55 7.45,268.49 7.93,269.38 8.53,270.18 9.25,270.89 10.05,271.50 10.94,271.98 11.88,272.33 12.87,272.55 13.87,272.62 29.41,272.62 30.41,272.55 31.40,272.33 32.34,271.98 33.22,271.50 34.03,270.89 34.74,270.18 35.35,269.38 35.83,268.49 36.18,267.55 36.40,266.56 36.47,265.56 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; fill: #9452C7;' />
+<text transform='translate(24.38,76.17) rotate(-90)' text-anchor='middle' style='font-size: 7.68px;fill: #FFFFFF; font-family: "Open Sans";' textLength='46.95px' lengthAdjust='spacingAndGlyphs'>Identification</text>
+<text transform='translate(24.38,193.46) rotate(-90)' text-anchor='middle' style='font-size: 7.68px;fill: #FFFFFF; font-family: "Open Sans";' textLength='35.16px' lengthAdjust='spacingAndGlyphs'>Screening</text>
+<text transform='translate(24.38,300.16) rotate(-90)' text-anchor='middle' style='font-size: 7.68px;fill: #FFFFFF; font-family: "Open Sans";' textLength='30.84px' lengthAdjust='spacingAndGlyphs'>Included</text>
+<text x='277.98' y='27.01' text-anchor='middle' style='font-size: 8.68px;fill: #FFFFFF; font-family: "Open Sans";' textLength='226.05px' lengthAdjust='spacingAndGlyphs'>Identification of new studies via databases and registers</text>
+<rect x='49.18' y='47.21' width='217.50' height='57.91' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
+<rect x='286.45' y='47.21' width='220.32' height='57.91' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #F0E6F8;' />
+<rect x='49.18' y='114.30' width='217.50' height='26.83' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
+<rect x='286.45' y='114.30' width='220.32' height='26.83' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #F0E6F8;' />
+<rect x='49.18' y='150.31' width='217.50' height='26.83' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
+<rect x='286.45' y='150.31' width='220.32' height='26.83' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #F0E6F8;' />
+<rect x='49.18' y='216.06' width='217.50' height='26.83' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
+<rect x='286.45' y='186.33' width='220.32' height='86.29' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #F0E6F8;' />
+<rect x='49.18' y='281.80' width='217.50' height='36.72' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
+<text x='57.65' y='74.63' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='82.94px' lengthAdjust='spacingAndGlyphs'>Records identified from:</text>
+<text x='70.36' y='82.97' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='73.67px' lengthAdjust='spacingAndGlyphs'>Databases (n = 3,747)</text>
+<text x='294.92' y='74.63' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='122.41px' lengthAdjust='spacingAndGlyphs'>Records removed before screening:</text>
+<text x='307.64' y='82.97' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='98.36px' lengthAdjust='spacingAndGlyphs'>Duplicate records (n = 1,127)</text>
+<text x='57.65' y='130.35' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='98.92px' lengthAdjust='spacingAndGlyphs'>Records screened (n = 2,620)</text>
+<text x='294.92' y='130.35' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='98.48px' lengthAdjust='spacingAndGlyphs'>Records excluded (n = 1,541)</text>
+<text x='57.65' y='166.36' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='132.41px' lengthAdjust='spacingAndGlyphs'>Reports sought for retrieval (n = 1,079)</text>
+<text x='294.92' y='166.36' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='100.83px' lengthAdjust='spacingAndGlyphs'>Reports not retrieved (n = 94)</text>
+<text x='57.65' y='232.11' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='135.28px' lengthAdjust='spacingAndGlyphs'>Reports assessed for eligibility (n = 985)</text>
+<text x='294.92' y='198.78' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='91.45px' lengthAdjust='spacingAndGlyphs'>Reports excluded (n = 759)</text>
+<text x='307.64' y='207.11' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='117.70px' lengthAdjust='spacingAndGlyphs'>Wrong/mixed population (n = 217)</text>
+<text x='307.64' y='215.44' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='99.70px' lengthAdjust='spacingAndGlyphs'>Wrong study design (n = 214)</text>
+<text x='307.64' y='223.78' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='87.02px' lengthAdjust='spacingAndGlyphs'>Insufficient data (n = 165)</text>
+<text x='307.64' y='232.11' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='86.91px' lengthAdjust='spacingAndGlyphs'>Wrong outcome (n = 109)</text>
+<text x='307.64' y='240.44' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='77.41px' lengthAdjust='spacingAndGlyphs'>Repeated data (n = 37)</text>
+<text x='307.64' y='248.77' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='97.25px' lengthAdjust='spacingAndGlyphs'>Article not in English (n = 11)</text>
+<text x='307.64' y='257.11' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='103.84px' lengthAdjust='spacingAndGlyphs'>Review/no original data (n = 5)</text>
+<text x='307.64' y='265.44' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='78.55px' lengthAdjust='spacingAndGlyphs'>Article retracted (n = 1)</text>
+<text x='57.65' y='294.46' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='122.66px' lengthAdjust='spacingAndGlyphs'>Reports included in review (n = 226)</text>
+<text x='70.36' y='302.80' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='147.67px' lengthAdjust='spacingAndGlyphs'>Observations included in review (n = 1,288)</text>
+<text x='70.36' y='311.13' style='font-size: 7.40px;fill: #1C1C1C; font-family: "Open Sans";' textLength='170.78px' lengthAdjust='spacingAndGlyphs'>Pairwise comparisons included in review (n = 782)</text>
+<line x1='266.68' y1='76.17' x2='286.45' y2='76.17' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='281.78,78.05 286.45,76.17 281.78,74.28 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='266.68' y1='127.72' x2='286.45' y2='127.72' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='281.78,129.60 286.45,127.72 281.78,125.83 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='266.68' y1='163.73' x2='286.45' y2='163.73' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='281.78,165.62 286.45,163.73 281.78,161.84 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='266.68' y1='229.47' x2='286.45' y2='229.47' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='281.78,231.36 286.45,229.47 281.78,227.59 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='157.93' y1='105.12' x2='157.93' y2='114.30' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='156.04,109.62 157.93,114.30 159.82,109.62 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='157.93' y1='141.13' x2='157.93' y2='150.31' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='156.04,145.64 157.93,150.31 159.82,145.64 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='157.93' y1='177.15' x2='157.93' y2='216.06' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='156.04,211.38 157.93,216.06 159.82,211.38 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+<line x1='157.93' y1='242.89' x2='157.93' y2='281.80' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt;' />
+<polygon points='156.04,277.13 157.93,281.80 159.82,277.13 ' style='stroke-width: 0.75; stroke: #9452C7; stroke-linecap: butt; fill: #9452C7;' />
+</g>
+</g>
+</svg>

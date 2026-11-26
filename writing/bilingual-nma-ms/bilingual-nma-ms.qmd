@@ -2,12 +2,6 @@
 title: "Measuring bilingual vocabulary: A systematic review and meta-analysis"
 shorttitle: "Bilingual vocabulary meta-analysis"
 author:
-  - name: Gianmatteo Farabolini
-    orcid: 0000-0003-4732-155X
-    affiliations: 
-      - name: Università Politecnica delle Marche
-        department: Department of Experimental and Clinical Medicine
-        id: univpm
   - name: Alvin Wei Ming Tan
     corresponding: true
     orcid: 0000-0001-5551-7507
@@ -21,29 +15,46 @@ author:
         country: USA
         postal-code: 94305
   - name: Federica Moro
+    orcid: 0009-0006-8388-6450 
     affiliations:
       - ref: univpm
-  - name: Maria Gabriella Ceravolo
-    orcid: 0000-0002-2694-4638
-    affiliations:
-      - ref: univpm
+  # - name: Maria Gabriella Ceravolo
+  #   orcid: 0000-0002-2694-4638
+  #   affiliations:
+  #     - ref: univpm
+  - name: Gianmatteo Farabolini
+    corresponding: true
+    orcid: 0000-0003-4732-155X
+    email: g.farabolini@univpm.it
+    affiliations: 
+      - name: Università Politecnica delle Marche
+        department: Department of Experimental and Clinical Medicine
+        address: Via Tronto 10
+        city: Ancona
+        country: Italy
+        postal-code: 60126
+        id: univpm
 author-note:
   status-changes: 
     affiliation-change: ~
     deceased: ~
   disclosures:
     study-registration: ~
-    data-sharing: ~
+    data-sharing: "All data and code are available on Github at [github.com/alvinwmtan/bilingual-nma](https://github.com/alvinwmtan/bilingual-nma)."
     related-report: ~
-    conflict-of-interest: ~
-    financial-support: ~
+    conflict-of-interest: "The authors report no competing interests."
+    financial-support: "The authors have no funding to report."
     gratitude: ~
-    authorship-agreements: "GF and AWMT contributed equally. The authors made the following contributions---GF: conceptualisation, methodology, investigation, writing -- original draft, writing -- review & editing; AWMT: conceptualisation, formal analysis, methodology, investigation, visualisation, writing -- original draft, writing -- review & editing; FM: investigation; MGC: supervision. Artificial intelligence tools were used as follows---Cursor with Grok 4.7 High was used to implement some analysis code as well as for code and manuscript review; no text was written by artificial intelligence tools."
-abstract: "This document is a template."
+    authorship-agreements: "The authors made the following contributions---AWMT: conceptualisation, formal analysis, methodology, investigation, visualisation, writing -- original draft, writing -- review & editing; FM: investigation; GF: conceptualisation, methodology, investigation, supervision, writing -- original draft, writing -- review & editing. Artificial intelligence tools were used as follows---Cursor with Grok 4.7 High was used to implement some analysis code as well as for code and manuscript review; no text was written by artificial intelligence tools."
+abstract: "Bilingual vocabulary sizes are often compared with monolingual scores, especially when bilingual normative data are not available, but there is no agreement on how to measure it. Bilingual vocabulary measurement can rely on single-language vocabularies, on the total amount of words known across languages (total vocabulary) or on the sum of concepts known in either language (conceptual vocabulary). We conducted a Bayesian network meta-analysis comparing these three bilingual measures against monolingual scores, and analysed potential effects of age, vocabulary domain (receptive or expressive), instrument type (direct or parent-report), language development status, and language distance. Out of 3747 records retrieved from ERIC, PubMed, PsycInfo, and Google Scholar, we included 226 studies reporting data on 50,020 children. Conceptual vocabulary did not credibly differ from monolingual scores ($g$ = −0.08, 95% CrI [−0.38, 0.21]), whereas total vocabulary was larger and single-language vocabulary was smaller. Older children showed a wider gap from monolinguals in total vocabulary and a smaller gap in single-language vocabulary, while conceptual vocabulary showed no reliable change over age. Bilingual--monolingual differences were more negative for expressive than for receptive vocabulary across bilingual measures, and direct tests widened the gap for single-language scores only. Language development status and language distance had no reliable effects, but both were sparsely sampled. When bilingual vocabulary size is compared with monolinguals', conceptual vocabulary would serve as the closest measure. Further research with children beyond the age of six, in clinical populations, and for more diverse languages would help to better characterise the comparisons between bilingual and monolingual vocabulary development."
 meta-analysis: true
 nocite: |
   @aartsAcademicLanguageShared2015, @abbot-smithUsingParentalQuestionnaires2018, @adi-japhaCognitiveFlexibilityDrawings2010, @allmanVocabularySizeAccuracy2005, @altFactorsThatInfluence2013, @altNovelWordLearning2019, @altmanQuantitativeQualitativeDifferences2017, @altmanVocabularyMetalinguisticAwareness2018, @anayaConceptualScoringClassification2018, @andreouCognitiveMechanismsMonolingual2021, @armon-lotemCDIStudyBilingual2016, @atkins-burnettPeerEffectsChildrens2017, @azadRelationshipBilingualismControl2023, @babayigitRoleOralLanguage2012, @babayigitVocabularyLimitationsUndermine2022, @bailLookGatoCodeswitching2015, @baoqiMetalinguisticContributionReading2020, @baracBehavioralElectrophysiologicalDifferences2016, @baracBilingualEffectsCognitive2012, @barachettiVocabularyProductionToddlers2022, @baraltBilingualismExecutiveFunction2020, @barbosaRoleWorkingShortterm2017, @barkeFurtherStudyComparative1938, @bedoreConceptualMonolingualScoring2005, @ben-zeevInfluenceBilingualismCognitive1977, @bialystokLanguageProficiencyExecutive2009, @bialystokLevelsBilingualismLevels1988, @bialystokReceptiveVocabularyDifferences2009, @bialystokRelationshipBilingualismDevelopment1998, @bialystokSubtleIncrementsSocioeconomic2021, @bialystokSwerveHowChildhood2022, @bialystokWordMappingExecutive2010, @boermaLanguageProficiencySustained2017, @bonifacciFewWordsLinguistic2018, @bootonChildrensDivergentThinking2021, @boschFirstTranslationEquivalents2014, @britoDifferencesLanguageExposure2015, @britoSpecificityBilingualAdvantage2014, @buacPredictorsProcessingbasedTask2016, @budde-spenglerRelationshipInputFactors2021, @burgoyneDevelopmentComprehensionReadingrelated2011, @byers-heinleinLexiconStructureDisambiguation2013, @byers-heinleinMonolingualBilingualTrilingual2009, @calvoIndependentEffectsBilingualism2014, @campRelationshipCognitiveEnvironment2010, @cangelosiHowSESMay2023, @carbajalDualLanguageInput2019, @carlsonBilingualExperienceExecutive2008, @cattaniHowMuchExposure2014, @chiappeSpeechPerceptionVocabulary2007, @chiatFrameworkCrosslinguisticNonword2016, @choDisentanglingLanguageStatus2021, @choiAcademicDevelopmentHead2018, @choiDualLanguageLearning2018, @chondrogianniDifferentialEffectsInternal2011, @chrysochoouBilingualEffectCognitive2021, @cockcroftComparisonVerbalWorking2014, @coreTotalConceptualVocabulary2013, @coteProductiveVocabularyThree2014, @crivelloEffectsBilingualGrowth2016, @dangeloUnderstandingLanguageBases2018, @davidsonExaminationMonolingualEnglish2019, @davidsonMonolingualBilingualChildrens2005, @deandaLexicalAccessSecond2018, @deandaPsychometricPropertiesEnglish2022, @dehouwerBilingualMonolingualComparisonYoung2014, @dezeeuwMorphologicalFamilySize2012, @diazBilingualMonolingualPreschoolers2018, @diazMissingExplanationFalsebelief2017, @diazThereAssociationExecutive2021, @dickNoEvidenceBilingual2019, @dosiRoleEducationalSetting2019, @ehlDifferentiatedBilingualVocabulary2020, @engeldeabreuSpecificLanguageImpairment2014, @engeldeabreuWorkingMemoryMultilingual2011, @federicoStudyAlertingOrienting2023, @filippiTrajectoriesVerbalFluency2021, @fittonBilingualVocabularyAssessment2023, @floritHomeLanguageActivities2021, @friesenPredictorsVerbalFluency2021, @friesenProficiencyControlVerbal2014, @friesenReadingComprehensionStrategy2022, @gamezChildlevelFactorsAssociated2024, @gamezDualLanguageEnglishOnly2018, @gamezSpanishEnglishBilingualToddlers2022, @gampeBilingualChildrenAdapt2018, @gangopadhyayDomaingeneralInhibitionLexical2019, @gangopadhyayRoleSpeakerEye2020, @garraffaLinguisticCognitiveSkills2015, @gattBilingualVocabularyProduction2016, @gattLexicalMixingEarly2008, @gibsonDifficultiesUsingStandardized2017, @gibsonInfluenceNativeForeignAccented2019, @gibsonReceptiveexpressiveGapVocabulary2012, @giguereMajorityLanguageSkill2022, @goldmanNumericalCognitionBilingual2015, @gonzalezLanguageExperienceSocioeconomic2018, @gonzalezMeasuringSpanishComprehension2018, @goodrichRelationsOralLanguage2022, @gordonHighProficiencyTwo2016, @grossConceptualScoringReceptive2014, @gunnerudLevelsSkillsPredictive2022, @hamanHowDoesL12017, @heinWordFormProcessing2021, @hemsleyConceptualDistanceWord2012, @hemsleyPatternsDiversityLexical2010, @hoffDualLanguageExposure2012, @hoffExpressiveVocabularyDevelopment2014, @hoffLanguageGrowthEnglish2017, @huangExecutiveFunctionSkills2023, @janssenPhonemeAwarenessVocabulary2011, @junkerExpressiveVocabularyGermanEnglish2002, @junyentReadingComprehensionSpanish2020, @kanPreschoolersLearningHmong2005, @kapaAttentionalControlEarly2013, @karlsenVocabularyDevelopmentNorwegian2017, @kehoeBilingualPhonologicalAcquisition2019, @kehoeIntrawordVariabilityFrenchSpeaking2021, @kehoeWhatFactorsInfluence2020, @kehoeWhichPhonologicalLexical2024, @keithRoleWithinlanguageVocabulary2013, @kershnerEthnicGroupDifferences1972, @khouryaouadsalibyAssessingLebaneseBilingual2017, @kiddCrosslinguisticInfluenceSimultaneous2015, @kiese-himmelFrueheExpressiveWortschatzumfang2013, @kilgoreVocabularyAcquisitionBilingual2011, @klassertObjectActionNaming2014, @komeiliSentenceRepetitionMeasure2013, @koradeMonolingualBilingualChildrens2024, @korpinenWPPSIIVNEPSYIIPerformance2023, @kovyazinaExecutiveFunctionsImpact2021, @kwakkelImpactLexicalSkills2021, @lamTaxonomicDevelopmentYoung2020, @languageandreadingresearchconsortiumEnglishSpanishPredictors2021, @leeNonwordRepetitionPerformance2013, @legacyVocabularySizeTranslation2016, @mancilla-martinezSpanishspeakingPreschoolersConceptual2018, @marchmanConcurrentValidityCaregiver2002, @marchmanHowVocabularySize2010, @marchmanLanguagespecificNatureGrammatical2004, @marinova-toddCorplumCorePlum2012, @matratNewDynamicWord2023, @mcleodMultilingualismSpeechlanguageCompetence2016, @meirSyntacticAbilitiesVerbal2019, @messerPhonotacticProbabilityEffect2010, @millerMaskedEnglishSpeech2019, @moralesWorkingMemoryDevelopment2013, @nguyenSubcorticalCerebellarVolume2024, @nicoladisCrosslinguisticInfluenceFrench2012, @nicoladisHandPreferenceReferential2021, @nicoladisLanguageCognitivePredictors2018, @ohanaParentalReportsLexicon2023, @ostadghafourComprehensionComplexSentences2021, @otooleUsingParentReport2013, @parkBilingualismProcessingSpeed2020, @pearsonLexicalDevelopmentBilingual1993, @peetsAcademicDiscourseDissociating2013, @persiciVocabularyReadingSpeed2022, @poarchBilingualismModelMultitasking2015, @poulin-duboisEffectsBilingualismToddlers2011, @poulin-duboisLexicalAccessVocabulary2012, @priorChapter13Executive2016, @ramirez-esparzaImpactEarlySocial2016, @raudszusSituationModelBuilding2019, @raynoldsInventedSpellingsNonSpanish2010, @reeseTeReoMaori2018, @repnikLinkingDisambiguationRetention2021, @rinkerRelationshipFirstLanguage2017, @rispensBilingualChildrensProduction2015, @rivaLanguageRelatedSkillsBilingual2021, @rocha-hidalgoPatternsMutualExclusivity2021, @rochanavibhataRoleSyntacticCues2022, @rothouBiliteracyReadingAbility2020, @ruhlCharacterizationLanguageDevelopment2022, @salweiDoesLanguageMake2021, @schachinger-lorentzonDevelopmentalLanguageDisorder2024, @schaeferDevelopmentTabletApplication2016, @schaeferSternGwiazdaStar2019, @scheeleHomeLanguageEnvironment2010, @schonbergEffectsLanguageExperience2019, @schonbergLanguageExperienceToddlers2018, @schraeyenGlobalDifferencesMonolingual2018, @schwartzDepthLexicalKnowledge2012, @serratGrowingSociallyBilingual2021, @shahar-yamesSeparabilityLexicalMorphological2018, @sharaanImpactBilingualismExecutive2021, @shengLexicalDevelopmentMandarin2011, @shiroCulturalDifferencesContent2020, @shokrkonAbsenceBilingualCognitive2021, @silvermanLanguageSkillsReading2015, @silvermanTeachersInstructionStudents2013, @simosVocabularyGrowthSecond2014, @singhDoesInfantSpeech2019, @singhSensitivityRaceLanguage2020, @smithsonBilingualismReceptiveVocabulary2014, @spatgensSemanticNetworkLexical2018, @sunImpactsCOVID19Disruption2023, @sunSharedMultimodalInput2022, @sunWhatsWordCrosslinguistic2021, @talliShorttermMemoryWorking2020, @thordardottirRelationshipBilingualExposure2011, @thornLanguagespecificKnowledgeShortterm1999, @tonerLinksLanguageExecutive2021, @tsoiMandarinEnglishSpeaking2019, @vaghMeasuringGrowthBilingual2009, @vandenboschFirstSecondLanguage2020, @vanderveldekreminEffectsSpanishHeritage2016, @vaughnCorticalThicknessBilingual2021, @venderPhonologicalAwarenessChild2021, @venderProductionCliticPronouns2018, @verbeekEarlyInterventionLanguage2023, @verbeekIndividualVariationBilingual2024, @verhagenEffectsBilingualLanguage2020, @verhagenHowVerbalShortterm2016, @vermeerExploringLexiconQuantitative2004, @wermelingerBilingualToddlersHave2017, @windsorSearchCommonGround2004, @woldAccuracyTeachersPredictions2013, @woodsDevelopmentTranslationEquivalents2013, @yanFindingMotJuste2009, @yeongImportancePhonologicalOrthographic2014, @yowBilingualAdvantageHow2015, @yuanFactorsAffectingL22020, @zhangAssessingVocabularyGrammar2024, @zhangPhonologicalMorphologicalLiteracy2023, @zoutenbierExploringRelationshipNative2019
-# impact-statement: "This template helps you get started."
+impact-statement: |
+  *	Bilingual vocabulary size can be measured as single-language vocabulary, total vocabulary across languages, or as conceptual vocabulary calculating translation equivalents as _dog_ and _perro_ only once.
+  *	A Bayesian network meta-analysis of 226 studies (50,020 children) compared three bilingual measures with monolingual vocabulary across age, vocabulary domain, instrument type, language development status, and language distance.
+  *	Conceptual vocabulary did not differ credibly from monolingual vocabulary, whereas single-language scores were smaller and total vocabulary larger, with the latter gap being wider for older children.
+  *	Conceptual scores would serve as the most suitable measure when comparing bilingual and monolingual children, although evidence remains limited beyond the age of six and in clinical populations.
 # Optional pointer to supplemental materials, shown below the keywords.
 # supplemental-materials: "Data and code are at <https://example.org/>"
 keywords: [bilingualism, vocabulary, language acquisition, network meta-analysis]
@@ -123,29 +134,34 @@ Finally, language similarity has been analysed to consider the proximity between
 
 As observed by @weislederUsingParentReport2024, in studies of bilingual language development, there is significant heterogeneity in researcher choices about which language measures to use, whether expressive or receptive vocabulary is measured, and the population of bilinguals sampled. Thus, in the current study, we aim to synthesise the evidence regarding bilingual and monolingual vocabulary measurement through a systematic review and network meta-analysis. 
 
-Specifically, we considered the following preregistered research questions (RQs):
+Specifically, we considered the following confirmatory research questions (RQs):
 
 1. Are there differences between monolinguals' and bilinguals' vocabulary size? How does this depend on which vocabulary measure is used?
 2. What is the effect of age on the comparison between monolinguals' and bilinguals' vocabulary?
 3. What is the effect of vocabulary domain (receptive versus expressive) on the comparison between monolinguals' and bilinguals' vocabulary?
 4. What is the effect of the instrument (direct versus indirect tools) on the comparison between monolinguals' and bilinguals' vocabulary?
 
-We also considered the following exploratory research questions
+We also considered the following exploratory research questions:[^rqs]
 
 5. What is the effect of language development status (typical versus atypical) on the comparison between monolinguals' and bilinguals' vocabulary?
 6. What is the effect of language similarity on the comparison between monolinguals' and bilinguals' vocabulary?
 
+[^rqs]: The set of RQs deviated slightly from our preregistration; instrument and language similarity shifted from subgroup analyses (for studies using the same instrument or with children of the same language pair) to covariate analyses in a meta-regression, in line with the other RQs, and to better handle the notable variation in these features across observations. An additional planned moderator (comparing between dominant and native language) could not be included due to insufficient data.
+
 # Method
 
 The research design followed the Preferred Reporting Items for Systematic Reviews and
-Meta-Analyses (PRISMA) guidelines for systematic reviews and meta-analyses [@liberatiPRISMAStatementReporting2009]. The current study was registered in the International Prospective Register of Systematic Reviews (PROSPERO; CRD42021248015). 
+Meta-Analyses (PRISMA) guidelines for systematic reviews and meta-analyses [@liberatiPRISMAStatementReporting2009]. The current study was registered in the International Prospective Register of Systematic Reviews (PROSPERO; CRD42021248015); deviations from preregistration are specified below.
+All data and code are available on Github at [github.com/alvinwmtan/bilingual-nma](https://github.com/alvinwmtan/bilingual-nma).
 
 ## Systematic review
 
 ### Search and screening protocol
 
-We used four open-access databases for literature searching: ERIC, PubMed, PsycInfo, and Google Scholar.  We employed a broad search strategy using the following keywords: (bilingual OR multilingual OR plurilingual) AND (vocabulary) AND (infant* OR toddler* OR child*). The search was conducted in May 2024. <!--We also included records obtained from expert recommendations and hand searching.-->
-Literature screening was carried out following these steps: abstract retrieval, abstract screening, full text retrieval and full text screening. Double-blind study selection at abstract level was performed by two independent screeners (GF and AWMT). Once the literature search and screening were finished, the first and second authors compared their inclusion decisions and, when needed, reached an agreement through a consensus process. Finally, full-text screening was carried out by one independent reviewer (GF, AWMT, or FM). 
+We used four open-access databases for literature searching: ERIC, PubMed, PsycInfo, and Google Scholar.[^search] We employed a broad search strategy using the following keywords: (bilingual OR multilingual OR plurilingual) AND (vocabulary) AND (infant* OR toddler* OR child*). The search was conducted in May 2024. <!--We also included records obtained from expert recommendations and hand searching.-->
+We screened the literature following these steps: abstract retrieval, abstract screening, full text retrieval, and full text screening. Study selection at abstract level was performed by two independent screeners (BLINDED). Once the literature search and screening were finished, the screeners compared their inclusion decisions and, when needed, reached an agreement through a consensus process. Finally, full-text screening was carried out by one independent reviewer (BLINDED). 
+
+[^search]: We added PsycInfo as an additional database, deviating from our preregistration, to improve coverage of the psychology literature.
 
 ### Inclusion and exclusion criteria
 
@@ -165,12 +181,14 @@ In sum, studies included in the systematic review should a) include direct and/o
 
 ### Data extraction
 
-For included articles, we extracted article metadata (citation, year, DOI), sample demographics, and vocabulary assessment data, with one row per vocabulary size measurement. Specifically, concerning demographics, we extracted data on the sample size, age, language(s) the child has been exposed to, bilingual type (simultaneous or sequential), and country of origin. Regarding vocabulary assessments, we extracted the vocabulary assessment tool, the vocabulary domain assessed (expressive or receptive), the vocabulary measure for bilinguals (single-language, conceptual, or total), and the units of measurement (raw score, proportions, percentiles, or standardised scores). Vocabulary sizes were recorded as means and standard deviations. The codebook for our data extraction can be found at [URL].
+For included articles, we extracted article metadata (citation, year, DOI), sample demographics, and vocabulary assessment data, with one row per vocabulary size measurement. Specifically, concerning demographics, we extracted data on the sample size, age, language(s) the child has been exposed to, bilingual type (simultaneous or sequential), and country of origin. Regarding vocabulary assessments, we extracted the vocabulary assessment tool, the vocabulary domain assessed (expressive or receptive), the vocabulary measure for bilinguals (single-language, conceptual, or total), and the units of measurement (raw score, proportions, percentiles, or standardised scores). Vocabulary sizes were recorded as means and standard deviations. The codebook for our data extraction can be found on Github at (BLINDED). <!--[github.com/alvinwmtan/bilingual-nma/blob/main/bilingual-nma-codebook.pdf](https://github.com/alvinwmtan/bilingual-nma/blob/main/bilingual-nma-codebook.pdf).-->
 
 ## Network meta-analysis
 We prepared the extracted data for network meta-analysis by converting them into pairwise contrasts. If studies contained at least one monolingual sample, we constructed pairwise contrasts between monolingual samples and all bilingual samples that share a language with that monolingual sample. Otherwise, we constructed non-redundant pairwise contrasts among bilingual vocabulary measures (e.g., single-language versus conceptual).
 
-To integrate and analyse data from a range of different designs, we opted to use a network meta-regression with four nodes: monolingual vocabulary, bilingual single-language vocabulary, bilingual total vocabulary, and bilingual conceptual vocabulary. Data were entered as pairwise contrasts between nodes, operationalised as standardised mean differences using Hedges' $g$ [@hedgesDistributionTheoryGlasss1981], with monolinguals as the network reference level. We included random intercepts for study and cohort, and included deviations for multiple correlated measurements from the same bilingual sample. 
+To integrate and analyse data from a range of different designs, we opted to use a network meta-regression with four nodes: monolingual vocabulary, bilingual single-language vocabulary, bilingual total vocabulary, and bilingual conceptual vocabulary.[^nma] Data were entered as pairwise contrasts between nodes, operationalised as standardised mean differences using Hedges' $g$ [@hedgesDistributionTheoryGlasss1981], with monolinguals as the network reference level. We included random intercepts for study and cohort, and included deviations for multiple correlated measurements from the same bilingual sample. 
+
+[^nma]: We had preregistered a random-effects meta-analysis conducted in Review Manager; however, because we also extracted within-bilingual vocabulary comparisons, we opted to deviate from the preregistration to use a Bayesian network meta-analysis conducted in R, in order to appropriately account for the correlated measurements from the same samples.
 
 Meta-regression was represented by node-specific covariate coefficients, with the coefficients for monolinguals fixed at zero. We included all covariates (age, domain, instrument, typicality, and language distance) after mean-centring and scaling numeric variables. Binary variables were operationalised with sum contrasts. Language distance was operationalised using the Automated Similarity Judgment Program (ASJP) distance, which is calculated as the mean normalised Levenshtein distance of the phonemic representations of a core vocabulary list of about 40 words (languages varied in how many words were available). We used mean imputation for language distances of bilingual groups with heterogeneous language profiles (e.g., if the study included bilinguals who were learning English and a variety of other languages), for which language distances were not calculable.
 
@@ -507,7 +525,56 @@ The current network meta-regression revealed that bilingual conceptual vocabular
 @fig-prisma shows the PRISMA flow diagram for the network meta-analysis.
 We note that many of the studies excluded due to wrong study design were not eligible for inclusion because they did not contain a comparison of interest (either a bilingual versus monolingual comparison, or a comparison among different vocabulary measures for bilinguals).
 
-![PRISMA flow diagram for the meta-analysis](figs/fig-prisma.pdf){#fig-prisma}
+```{r}
+#| label: "fig-prisma"
+#| fig.width: 7.2
+#| fig.height: 4.55
+#| fig.cap: "PRISMA flow diagram for the meta-analysis."
+
+# Search-hit total before deduplication; screened records are the Rayyan export.
+n_database <- 3747L
+n_screened <- nrow(read_csv(here("data", "20240713-AWMT", "articles.csv")))
+n_duplicates <- n_database - n_screened
+
+df_exclusions <- readRDS(here("outputs", "df_exclusions.rds"))
+excl_map <- c(
+  "wrong/mixed population" = "Wrong/mixed population",
+  "DLL"                    = "Wrong/mixed population",
+  "no comparison"          = "Wrong study design",
+  "wrong study design"     = "Wrong study design",
+  "no/missing data"        = "Insufficient data",
+  "wrong outcome"          = "Wrong outcome",
+  "repeated data"          = "Repeated data",
+  "article language"       = "Article not in English",
+  "review"                 = "Review/no original data",
+  "no original data"       = "Review/no original data",
+  "retracted"              = "Article retracted"
+)
+
+n_notretrieved <- df_exclusions |>
+  filter(exclusion_reason_cleaned == "no full text") |>
+  nrow()
+excl <- df_exclusions |>
+  filter(exclusion_reason_cleaned != "no full text") |>
+  mutate(reason = recode(exclusion_reason_cleaned, !!!excl_map)) |>
+  count(reason, name = "n") |>
+  arrange(desc(n))
+
+n_studies <- n_distinct(df_data$long_cite)
+n_obs <- nrow(df_data)
+n_contrasts <- nrow(df_contrasts)
+n_excluded_ft <- sum(excl$n)
+n_assessed <- n_studies + n_excluded_ft
+n_sought <- n_assessed + n_notretrieved
+n_records_excluded <- n_screened - n_sought
+stopifnot(n_records_excluded >= 0L)
+
+plot_prisma(
+  n_database, n_duplicates, n_screened, n_records_excluded,
+  n_sought, n_notretrieved, n_assessed, excl,
+  n_studies, n_obs, n_contrasts
+)
+```
 
 # Network meta-analysis model formulation {#apx-model}
 We fitted a Bayesian network meta-analysis with four nodes: monolingual vocabulary (Mono), bilingual single-language vocabulary (Bi-SL), bilingual total vocabulary (Bi-TV), and bilingual conceptual vocabulary (Bi-CV). Mono was used as the network reference, and effects were represented as contrasts between nodes, operationalised as standardised mean differences calculated as Hedges' $g$. We term the set of bilingual nodes $Bi = \{\text{Bi-SL, Bi-TV, Bi-CV}\}$.
